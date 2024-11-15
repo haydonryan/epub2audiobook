@@ -19,6 +19,13 @@ fn get_title(html: &str) -> String {
     title.clone()
 }
 
+/// Outputs a string to a filename.
+///
+/// # Arguments
+/// * `filename` - The filename(path) to write out to
+/// * `contents` - The text string that will be written to the file
+///
+/// Paths are supported as long as they already exist
 fn output_to_file(filename: String, contents: &str) {
     let mut file = match File::create(filename) {
         Ok(file) => file,
@@ -29,6 +36,14 @@ fn output_to_file(filename: String, contents: &str) {
     }
 }
 
+/// Outputs the embedded cover (if exists)
+///
+/// # Arguments
+/// * `directory` - The directory that the cover file will be put in.  It will be named Cover and
+///                 have the same extnesion as it was embedded with.
+/// * `doc` - The epub object
+/// # Returns
+/// Nothing as we don't want to fail if there are no embedded covers
 fn output_cover(directory: String, doc: &mut EpubDoc<BufReader<File>>) {
     // Get Cover
 
