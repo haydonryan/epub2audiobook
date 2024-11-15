@@ -3,6 +3,7 @@ use scraper::{Html, Selector};
 use std::env;
 use std::fmt;
 use std::fs::File;
+use std::io::BufReader;
 use std::io::Write;
 use std::str;
 
@@ -28,6 +29,25 @@ fn output_to_file(filename: String, contents: &str) {
     }
 }
 
+fn output_cover(directory: String, doc: &mut EpubDoc<BufReader<File>>) {
+    // Get Cover
+
+    let cover_data = doc.get_cover().unwrap();
+    //let filename = format!("{}/Cover.png", directory);
+
+    let filename = match cover_data.1.as_ref() {
+        "image/jpeg" => format!("{}/Cover.jpg", directory),
+        "image/png" => format!("{}/Cover.png", directory),
+        _ => format!("{}/Cover.png", directory),
+    };
+
+    let f = File::create(filename);
+    assert!(f.is_ok());
+    let mut f = f.unwrap();
+    let _resp = f.write_all(&cover_data.0);
+
+    dbg!(cover_data.1);
+}
 #[derive(Debug)]
 enum Epub2AudiobookError {
     IncorrectNumberOfArguments,
@@ -69,15 +89,7 @@ fn main() -> Result<(), Epub2AudiobookError> {
     let title = doc.mdata("title");
     let author = doc.mdata("creator");
 
-    // Get Cover
-    /*
-        let cover_data = doc.get_cover().unwrap();
-
-        let f = fs::File::create("/tmp/cover.png");
-        assert!(f.is_ok());
-        let mut f = f.unwrap();
-        //let resp = f.write_all(&cover_data);
-    */
+    output_cover(output_directory.to_string(), &mut doc);
     //dbg!(doc.resources);
 
     let number_of_ids = doc.spine.len();
