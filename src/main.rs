@@ -5,6 +5,7 @@ use std::fmt;
 use std::fs::File;
 use std::io::BufReader;
 use std::io::Write;
+use std::path::Path;
 use std::str;
 
 fn get_title(html: &str) -> String {
@@ -101,6 +102,11 @@ fn main() -> Result<(), Epub2AudiobookError> {
     }
     let filename = &args[1];
     let output_directory = &args[2];
+
+    // Check if directory already exists if it doesn't then create it.
+    if !Path::new(output_directory).exists() {
+        std::fs::create_dir(output_directory).unwrap();
+    }
 
     // Load the EPUB
     let doc = EpubDoc::new(filename);
