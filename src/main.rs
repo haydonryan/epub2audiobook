@@ -48,6 +48,9 @@ fn output_cover(directory: String, doc: &mut EpubDoc<BufReader<File>>) {
 
     dbg!(cover_data.1);
 }
+
+// Errors for main
+
 #[derive(Debug)]
 enum Epub2AudiobookError {
     IncorrectNumberOfArguments,
@@ -62,6 +65,10 @@ impl fmt::Display for Epub2AudiobookError {
         }
     }
 }
+
+///
+/// Main Function
+///
 
 fn main() -> Result<(), Epub2AudiobookError> {
     println!("EPUB to TXT Converter");
