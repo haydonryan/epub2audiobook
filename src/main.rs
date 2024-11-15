@@ -45,7 +45,7 @@ fn output_to_file(filename: String, contents: &str) {
 /// * `doc` - The epub object
 /// # Returns
 /// Nothing as we don't want to fail if there are no embedded covers
-fn output_cover(directory: String, doc: &mut EpubDoc<BufReader<File>>) {
+fn save_cover(directory: String, doc: &mut EpubDoc<BufReader<File>>) {
     // Get Cover
 
     let cover_data = doc.get_cover().unwrap();
@@ -90,8 +90,8 @@ fn main() -> Result<(), Epub2AudiobookError> {
     println!("EPUB to TXT Converter");
     println!("---------------------");
 
+    // Grab Command Line Arguments and print usage if incorrect.
     let args: Vec<String> = env::args().collect();
-
     if args.len() < 2 {
         println!();
         println!("Usage:");
@@ -113,41 +113,36 @@ fn main() -> Result<(), Epub2AudiobookError> {
     assert!(doc.is_ok());
     let mut doc = doc.unwrap();
 
-    // Grab title and author
+    // Grab book metadata
     let title = doc.mdata("title");
     let author = doc.mdata("creator");
-
-    output_cover(output_directory.to_string(), &mut doc);
-    //dbg!(doc.resources);
-
     let number_of_ids = doc.spine.len();
-    let spine = doc.spine.clone();
+
+    // Save the book cover to the output directory
+    save_cover(output_directory.to_string(), &mut doc);
 
     println!("Title: {}", title.unwrap());
     println!("Author: {}", author.unwrap());
     println!("Number of Sections: {}", number_of_ids);
     println!();
-    //dbg!(spine.clone());
+
+    let spine = doc.spine.clone();
     let mut i = 1;
     for current_section in spine {
         let path = doc.resources.get(&current_section).unwrap().0.clone();
         let text = doc.get_resource_by_path(path).unwrap();
         let html = str::from_utf8(&text).unwrap();
+        let filename = format!("{}/{:04}_{}.txt", output_directory, i, current_section);
+
         print!(
             "Converting chapter {}/{}: {} ",
-            i,
-            number_of_ids,
-            current_section,
-            //    path.to_str().unwrap().clone(),
-            //doc.resources.get(&current_section).unwrap().1
+            i, number_of_ids, current_section,
         );
 
-        let filename = format!("{}/{:04}_{}.txt", output_directory, i, current_section);
-        //println!("Filename: {}    Title: {}", filename, current_section);
         println!("Filename: {}", filename);
+
         let document = Html::parse_document(html);
         let selector = Selector::parse("body").unwrap();
-
         let _text: String = document
             .select(&selector)
             .flat_map(|element| element.text().collect::<Vec<_>>())
@@ -163,7 +158,9 @@ fn main() -> Result<(), Epub2AudiobookError> {
 
         i += 1;
     }
+    //dbg!(doc.resources);
     //dbg!(&doc);
+    //dbg!(spine.clone());
     return Ok(());
     let toc = doc.toc;
     //dbg!(&toc);
