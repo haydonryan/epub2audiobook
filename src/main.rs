@@ -1,6 +1,7 @@
 use epub::doc::EpubDoc;
 use scraper::{Html, Selector};
 use std::env;
+use std::fmt;
 use std::fs::File;
 use std::io::Write;
 use std::str;
@@ -27,15 +28,37 @@ fn output_to_file(filename: String, contents: &str) {
     }
 }
 
-fn main() {
-    let args: Vec<String> = env::args().collect();
-    let mut filename = "";
-    if args.len() > 1 {
-        filename = &args[1];
-    }
+#[derive(Debug)]
+enum Epub2AudiobookError {
+    IncorrectNumberOfArguments,
+}
 
+impl fmt::Display for Epub2AudiobookError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Epub2AudiobookError::IncorrectNumberOfArguments => {
+                write!(f, "Incorrect number of arguments provided.")
+            }
+        }
+    }
+}
+
+fn main() -> Result<(), Epub2AudiobookError> {
     println!("EPUB to TXT Converter");
     println!("---------------------");
+
+    let args: Vec<String> = env::args().collect();
+
+    if args.len() < 2 {
+        println!();
+        println!("Usage:");
+        println!("epub2audiobook <epub-filename.epub> <output-directory>");
+        println!();
+        //return Err("Incorrect Usage");
+        return Err(Epub2AudiobookError::IncorrectNumberOfArguments);
+    }
+    let filename = &args[1];
+    let output_directory = &args[2];
 
     // Load the EPUB
     let doc = EpubDoc::new(filename);
@@ -79,7 +102,7 @@ fn main() {
             //doc.resources.get(&current_section).unwrap().1
         );
 
-        let filename = format!("test/{:04}_{}.txt", i, current_section);
+        let filename = format!("{}/{:04}_{}.txt", output_directory, i, current_section);
         //println!("Filename: {}    Title: {}", filename, current_section);
         println!("Filename: {}", filename);
         let document = Html::parse_document(html);
@@ -101,7 +124,7 @@ fn main() {
         i += 1;
     }
     //dbg!(&doc);
-    return;
+    return Ok(());
     let toc = doc.toc;
     //dbg!(&toc);
     for t in toc {
@@ -111,4 +134,6 @@ fn main() {
             t.content.to_str().unwrap()
         );
     }
+
+    Ok(())
 }
