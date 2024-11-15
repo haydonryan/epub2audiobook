@@ -1,0 +1,8 @@
+[package]
+name = "rust-ebook-tts"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+epub = "2.1.2"
+scraper = "0.21.0"
