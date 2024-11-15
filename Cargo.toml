@@ -1,6 +1,6 @@
 [package]
-name = "ebook2tts"
-version = "0.1.1"
+name = "ebook2audiobook"
+version = "0.1.0"
 edition = "2021"
 
 [dependencies]
