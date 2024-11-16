@@ -152,8 +152,8 @@ fn main() -> Result<(), Epub2AudiobookError> {
     let title = doc.mdata("title");
     let author = doc.mdata("creator");
     let number_of_ids = doc.spine.len();
-
     let number_of_toc = doc.toc.len();
+
     // Save the book cover to the output directory
     save_cover(output_directory.to_string(), &mut doc);
 
@@ -260,7 +260,7 @@ fn main() -> Result<(), Epub2AudiobookError> {
         let path = doc.resources.get(&current_section).unwrap().0.clone();
         let text = doc.get_resource_by_path(path.clone()).unwrap();
         let html = str::from_utf8(&text).unwrap();
-        let mut filename = format!("{}/{:04}_{}.txt", output_directory, i, current_section);
+        let mut filename = format!("{}/{:04}_{}", output_directory, i, current_section);
 
         // Get any matching TOC items based off filename
         let p: String = path.to_string_lossy().into();
@@ -276,7 +276,10 @@ fn main() -> Result<(), Epub2AudiobookError> {
         toc_titles.push(toc_title.to_string());
         //println!("  - Title from TOC Tag: <{}>", toc_title);
         if toc_title.len() > 2 {
-            filename = format!("{}/{:04}_{}.txt", output_directory, i, toc_title);
+            filename = format!("{}/{:04}_{}", output_directory, i, toc_title);
+            output_to_file(filename.clone() + ".title", toc_title);
+        } else {
+            output_to_file(filename.clone() + ".title", &current_section);
         }
 
         print!(
@@ -299,13 +302,9 @@ fn main() -> Result<(), Epub2AudiobookError> {
             .flat_map(|element| element.text().collect::<Vec<_>>())
             .collect::<String>();
 
-        output_to_file(filename, &_text);
+        output_to_file(filename.clone() + ".txt", &_text);
 
-        filename = format!("{}/{:04}_{}.html", output_directory, i, current_section);
-        if toc_title.len() > 2 {
-            filename = format!("{}/{:04}_{}.html", output_directory, i, toc_title);
-        }
-        output_to_file(filename, html);
+        output_to_file(filename + ".html", html);
 
         i += 1;
     }
