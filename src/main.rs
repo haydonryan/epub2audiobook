@@ -157,28 +157,120 @@ fn main() -> Result<(), Epub2AudiobookError> {
     let author = doc.mdata("creator");
     let number_of_ids = doc.spine.len();
 
+    let number_of_toc = doc.toc.len();
     // Save the book cover to the output directory
     save_cover(output_directory.to_string(), &mut doc);
 
     println!("Title: {}", title.unwrap());
     println!("Author: {}", author.unwrap());
     println!("Number of Sections: {}", number_of_ids);
+    println!("Number of Items in TOC: {}", number_of_toc);
+
     println!();
 
+    //
+    // Grab metadata from document to help determine titles
+    //
+    let mut title_tag_titles: Vec<String> = Vec::new();
+    let mut section_tag_titles: Vec<String> = Vec::new();
+    let mut toc_titles: Vec<String> = Vec::new();
     let spine = doc.spine.clone();
     let mut i = 1;
     for current_section in spine {
         let path = doc.resources.get(&current_section).unwrap().0.clone();
-        let text = doc.get_resource_by_path(path).unwrap();
+        let text = doc.get_resource_by_path(path.clone()).unwrap();
         let html = str::from_utf8(&text).unwrap();
-        let filename = format!("{}/{:04}_{}.txt", output_directory, i, current_section);
+        //let toc = doc.toc.clone();
 
-        print!(
-            "Converting chapter {}/{}: {} ",
-            i, number_of_ids, current_section,
+        let p: String = path.to_string_lossy().into();
+        println!(
+            "Processing chapter {}/{}: Section Name: {} Path: {}",
+            i, number_of_ids, current_section, p,
         );
 
+        let mut toc_title = "";
+        for d in &doc.toc {
+            let toc_path: String = d.content.to_string_lossy().into();
+            if toc_path.contains(&p) {
+                //println!("Match: {} vs {} = {}", toc_path, p, d.label);
+                toc_title = &d.label;
+            }
+        }
+
+        toc_titles.push(toc_title.to_string());
+        println!("  - Title from TOC Tag: <{}>", toc_title);
+
+        let title_tag_title = get_title_from_title_tag(html);
+        if title_tag_title.ne("Cover") {
+            title_tag_titles.push(title_tag_title.clone());
+            println!("  - Title from Title Tag: <{}>", title_tag_title);
+        } else {
+            println!("  - Title from Title Tag: <{}> - ignoring", title_tag_title);
+        }
+
+        let section_tag_title = get_title_from_section_tag(html);
+        section_tag_titles.push(section_tag_title.clone());
+        println!("  - Title from Section Tag: <{}>", section_tag_title);
+        println!("------");
+        i += 1;
+    }
+
+    if all_strings_the_same(&title_tag_titles) {
+        // Title tag is the same - don't use.
+        println!("Title Tags all the same or all empty, don't use");
+    }
+    //dbg!(title_tag_titles);
+
+    if all_strings_the_same(&section_tag_titles) {
+        // Title tag is the same - don't use.
+        println!("Section Tags all the same or all empty, don't use");
+    }
+    //dbg!(section_tag_titles);
+    //
+    //
+    //
+    //
+    //
+    //
+    // Final loop to output all the files
+    let spine = doc.spine.clone();
+    let mut i = 1;
+    for current_section in spine {
+        let path = doc.resources.get(&current_section).unwrap().0.clone();
+        let text = doc.get_resource_by_path(path.clone()).unwrap();
+        let html = str::from_utf8(&text).unwrap();
+        let mut filename = format!("{}/{:04}_{}.txt", output_directory, i, current_section);
+
+        // Get any matching TOC items based off filename
+        let p: String = path.to_string_lossy().into();
+        let mut toc_title = "";
+        for d in &doc.toc {
+            let toc_path: String = d.content.to_string_lossy().into();
+            if toc_path.contains(&p) {
+                //println!("Match: {} vs {} = {}", toc_path, p, d.label);
+                toc_title = &d.label;
+            }
+        }
+
+        toc_titles.push(toc_title.to_string());
+        println!("  - Title from TOC Tag: <{}>", toc_title);
+        if toc_title.len() > 2 {
+            filename = format!("{}/{:04}_{}.txt", output_directory, i, toc_title);
+        }
+
+        /* print!(
+                    "Converting chapter {}/{}: {} ",
+                    i, number_of_ids, current_section,
+                );
+
+        */
         println!("Filename: {}", filename);
+        //println!("resource: {}", path.clone().unwrap().to_str());
+        //let tag_title = get_title_from_title_tag(html);
+        //println!("  - Title from Title Tag: <{}>", tag_title);
+
+        //let section_title = get_title_from_section_tag(html);
+        //println!("  - Title from Section Tag: <{}>", section_title);
 
         let document = Html::parse_document(html);
         let selector = Selector::parse("body").unwrap();
