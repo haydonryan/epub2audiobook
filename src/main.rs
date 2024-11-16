@@ -157,13 +157,24 @@ fn main() -> Result<(), Epub2AudiobookError> {
     // Save the book cover to the output directory
     save_cover(output_directory.to_string(), &mut doc);
 
-    println!("Title: {}", title.unwrap());
-    println!("Author: {}", author.unwrap());
+    println!("Title: {}", title.clone().unwrap());
+    println!("Author: {}", author.clone().unwrap());
     println!("Number of Sections: {}", number_of_ids);
     println!("Number of Items in TOC: {}", number_of_toc);
 
     println!();
 
+    let includes = format!(
+        "#!/bin/bash\n \
+                            export BOOK_TITLE=\"{}\" \n \
+                            export BOOK_AUTHOR=\"{}\" \n \
+                            export BOOK_COVER=\"{}\" \n",
+        title.unwrap(),
+        author.unwrap(),
+        "cover"
+    );
+    // Save the book Title, Author and CoverName to bash script
+    output_to_file(output_directory.to_string() + "/book.sh", &includes);
     //
     // Grab metadata from document to help determine titles
     //
