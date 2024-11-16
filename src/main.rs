@@ -40,6 +40,25 @@ fn get_title_from_title_tag(html: &str) -> String {
     title.clone()
 }
 
+/// Return if all the strings ar ethe same (or empty)
+///
+/// # arguments
+/// * `strings` - A Vector of strings to search
+fn all_strings_the_same(strings: &Vec<String>) -> bool {
+    if strings.is_empty() {
+        return true; // Empty vector is considered to have all strings the same
+    }
+
+    let first_string = &strings[0];
+    for string in strings {
+        if string != first_string {
+            return false;
+        }
+    }
+
+    true
+}
+
 /// Outputs a string to a filename.
 ///
 /// # Arguments
