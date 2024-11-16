@@ -34,7 +34,7 @@ fn get_title_from_title_tag(html: &str) -> String {
         .flat_map(|element| element.text().collect::<Vec<_>>())
         .collect::<String>();
 
-    title.clone()
+    title.to_owned()
 }
 
 /// Return if all the strings ar ethe same (or empty)
@@ -264,7 +264,7 @@ fn main() -> Result<(), Epub2AudiobookError> {
     let mut i = 1;
     for current_section in spine {
         let path = doc.resources.get(&current_section).unwrap().0.clone();
-        let text = doc.get_resource_by_path(path.clone()).unwrap();
+        let text = doc.get_resource_by_path(&path).unwrap();
         let html = str::from_utf8(&text).unwrap();
         let mut filename = format!("{}/{:04}_{}", output_directory, i, current_section);
         filename = sanitize_filename(&filename);
