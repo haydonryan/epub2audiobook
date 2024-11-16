@@ -8,7 +8,27 @@ use std::io::Write;
 use std::path::Path;
 use std::str;
 
-fn get_title(html: &str) -> String {
+fn get_title_from_section_tag(html: &str) -> String {
+    let document = Html::parse_document(html);
+    let selector = Selector::parse("section").unwrap();
+    let input = document.select(&selector).next();
+
+    if input.is_none() {
+        return "".to_string();
+    }
+    let input = input.unwrap();
+
+    if let input = document.select(&selector).next() {
+        match input.unwrap().attr("title") {
+            Some(input) => input.to_string(),
+            None => "".to_string(),
+        }
+    } else {
+        "".to_string()
+    }
+}
+
+fn get_title_from_title_tag(html: &str) -> String {
     let document = Html::parse_document(html);
     let selector = Selector::parse("title").unwrap();
 
