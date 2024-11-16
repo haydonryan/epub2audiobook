@@ -1,4 +1,5 @@
 use epub::doc::EpubDoc;
+use regex::Regex;
 use scraper::{Html, Selector};
 use std::env;
 use std::fmt;
@@ -96,6 +97,11 @@ fn save_cover(directory: String, doc: &mut EpubDoc<BufReader<File>>) {
     assert!(f.is_ok());
     let mut f = f.unwrap();
     let _resp = f.write_all(&cover_data.0);
+}
+
+fn sanitize_filename(input: &str) -> String {
+    let re = Regex::new(r"[^a-zA-Z0-9_\.\-\/]").unwrap();
+    re.replace_all(input, "_").to_string()
 }
 
 // Errors for main
@@ -261,6 +267,7 @@ fn main() -> Result<(), Epub2AudiobookError> {
         let text = doc.get_resource_by_path(path.clone()).unwrap();
         let html = str::from_utf8(&text).unwrap();
         let mut filename = format!("{}/{:04}_{}", output_directory, i, current_section);
+        filename = sanitize_filename(&filename);
 
         // Get any matching TOC items based off filename
         let p: String = path.to_string_lossy().into();
@@ -277,6 +284,7 @@ fn main() -> Result<(), Epub2AudiobookError> {
         //println!("  - Title from TOC Tag: <{}>", toc_title);
         if toc_title.len() > 2 {
             filename = format!("{}/{:04}_{}", output_directory, i, toc_title);
+            filename = sanitize_filename(&filename);
             output_to_file(filename.clone() + ".title", toc_title);
         } else {
             output_to_file(filename.clone() + ".title", &current_section);

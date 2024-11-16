@@ -5,4 +5,5 @@ edition = "2021"
 
 [dependencies]
 epub = "2.1.2"
+regex = "1.11.1"
 scraper = "0.21.0"
