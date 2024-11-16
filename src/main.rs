@@ -16,15 +16,11 @@ fn get_title_from_section_tag(html: &str) -> String {
     if input.is_none() {
         return "".to_string();
     }
-    let input = input.unwrap();
 
-    if let input = document.select(&selector).next() {
-        match input.unwrap().attr("title") {
-            Some(input) => input.to_string(),
-            None => "".to_string(),
-        }
-    } else {
-        "".to_string()
+    let input = document.select(&selector).next();
+    match input.unwrap().attr("title") {
+        Some(input) => input.to_string(),
+        None => "".to_string(),
     }
 }
 
@@ -100,8 +96,6 @@ fn save_cover(directory: String, doc: &mut EpubDoc<BufReader<File>>) {
     assert!(f.is_ok());
     let mut f = f.unwrap();
     let _resp = f.write_all(&cover_data.0);
-
-    dbg!(cover_data.1);
 }
 
 // Errors for main
@@ -126,8 +120,10 @@ impl fmt::Display for Epub2AudiobookError {
 ///
 
 fn main() -> Result<(), Epub2AudiobookError> {
-    println!("EPUB to TXT Converter");
-    println!("---------------------");
+    println!();
+    println!("=========================");
+    println!("= EPUB to TXT Converter =");
+    println!("=========================");
 
     // Grab Command Line Arguments and print usage if incorrect.
     let args: Vec<String> = env::args().collect();
@@ -171,6 +167,10 @@ fn main() -> Result<(), Epub2AudiobookError> {
     //
     // Grab metadata from document to help determine titles
     //
+    //
+    println!("Grabbing all title options for book");
+    println!("-----------------------------------");
+    println!();
     let mut title_tag_titles: Vec<String> = Vec::new();
     let mut section_tag_titles: Vec<String> = Vec::new();
     let mut toc_titles: Vec<String> = Vec::new();
@@ -211,10 +211,13 @@ fn main() -> Result<(), Epub2AudiobookError> {
         let section_tag_title = get_title_from_section_tag(html);
         section_tag_titles.push(section_tag_title.clone());
         println!("  - Title from Section Tag: <{}>", section_tag_title);
-        println!("------");
+        println!();
         i += 1;
     }
 
+    println!("Applying Rules to decide Title Source");
+    println!("-------------------------------------");
+    println!();
     if all_strings_the_same(&title_tag_titles) {
         // Title tag is the same - don't use.
         println!("Title Tags all the same or all empty, don't use");
@@ -225,6 +228,8 @@ fn main() -> Result<(), Epub2AudiobookError> {
         // Title tag is the same - don't use.
         println!("Section Tags all the same or all empty, don't use");
     }
+    println!("Hardcoded to use TOC Tags for now.");
+
     //dbg!(section_tag_titles);
     //
     //
@@ -233,6 +238,11 @@ fn main() -> Result<(), Epub2AudiobookError> {
     //
     //
     // Final loop to output all the files
+    println!();
+    println!();
+    println!("Converting to Chapters");
+    println!("----------------------");
+    println!();
     let spine = doc.spine.clone();
     let mut i = 1;
     for current_section in spine {
@@ -253,17 +263,16 @@ fn main() -> Result<(), Epub2AudiobookError> {
         }
 
         toc_titles.push(toc_title.to_string());
-        println!("  - Title from TOC Tag: <{}>", toc_title);
+        //println!("  - Title from TOC Tag: <{}>", toc_title);
         if toc_title.len() > 2 {
             filename = format!("{}/{:04}_{}.txt", output_directory, i, toc_title);
         }
 
-        /* print!(
-                    "Converting chapter {}/{}: {} ",
-                    i, number_of_ids, current_section,
-                );
-
-        */
+        print!(
+            "Converting Chapter {:>3}/{}: {:<21} ",
+            i, number_of_ids, current_section,
+        );
+        print!("Title Source: TOC    ");
         println!("Filename: {}", filename);
         //println!("resource: {}", path.clone().unwrap().to_str());
         //let tag_title = get_title_from_title_tag(html);
@@ -286,27 +295,13 @@ fn main() -> Result<(), Epub2AudiobookError> {
             filename = format!("{}/{:04}_{}.html", output_directory, i, toc_title);
         }
         output_to_file(filename, html);
-        //println!("--------------------------------------------------");
-        //print!("HTML: <{}>", html);
-        //println!("--------------------------------------------------");
-        //print!("TEXT: <{}>", _text);
-        //println!("--------------------------------------------------");
 
         i += 1;
     }
-    //dbg!(doc.resources);
-    //dbg!(&doc);
-    //dbg!(spine.clone());
-    return Ok(());
-    let toc = doc.toc;
-    //dbg!(&toc);
-    for t in toc {
-        println!(
-            "{}                         | {}",
-            t.label,
-            t.content.to_str().unwrap()
-        );
-    }
+
+    println!();
+    println!("Done.");
+    println!();
 
     Ok(())
 }
