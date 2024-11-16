@@ -1,4 +1,4 @@
-# EPUB 2 AUDIOBOOK
+# EPUB 2 AUDIOBOOK (Local)
 
 Simple project to convert EPUB books into text files for conversion to audiobooks.
 
@@ -11,7 +11,8 @@ If you're looking for an all in one that will send the text to Azure TTS and Ope
 
 ## Features
 - Extracts all text from book into individual files
-- Extracts the Cover image (if it exists)
+- Embeds the Cover image (if it exists) in the MP3 files
+- Export book titles chapters and author for use in scripts later
 
 ## How Chapter Titles are handled.
 Chapter Titles are currently matched with the Table of Contents, if a match does not exist then the internal (to the epub) is used. This works ok, more work here is needed.
@@ -57,11 +58,13 @@ After converting a decent amount of books to audiobooks, I found there are reall
 4. WAV -> MP3 via ffmpeg
    Currently Piper TTS only outputs wav files. The hardest part about converting these to mp3 is to inject the Title, Author, Chapter Title, and Cover into the ID4 tags of the MP3.
     ``` bash
-    <coming soon>
+    # From the output directory, not WAV - Important
+    ../encode_wav_to_mp3.sh
+
     ```
+    This will encode all WAV files in the WAV directory. Files are placed into an MP3 Directory, Simply move them to your audiobookshelf folder and they will appear.
 
 ## Todo
-- Export book titles chapters and author for use in scripts later
 - Add unit tests
 - Add integration tests
 - Setup CI to build releases
