@@ -281,6 +281,11 @@ fn main() -> Result<(), Epub2AudiobookError> {
 
         output_to_file(filename, &_text);
 
+        filename = format!("{}/{:04}_{}.html", output_directory, i, current_section);
+        if toc_title.len() > 2 {
+            filename = format!("{}/{:04}_{}.html", output_directory, i, toc_title);
+        }
+        output_to_file(filename, html);
         //println!("--------------------------------------------------");
         //print!("HTML: <{}>", html);
         //println!("--------------------------------------------------");
