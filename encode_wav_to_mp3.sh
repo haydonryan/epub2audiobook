@@ -3,7 +3,7 @@
 echo "Run this from your output directory, not the base repository directory."
 
 mkdir MP3
-cd wav/ > /dev/null
+cd WAV/ > /dev/null
 let i=1
 
 echo "Grabbing book title, author and cover file."
@@ -20,7 +20,12 @@ for f in *.wav; do
   outfile=$(echo ${f/.txt.wav/} )
   echo "$outfile"
 
-  ffmpeg -loglevel info -ac 1 -channel_layout mono -y -i "$f" -i "../Cover.jpg" -c:v copy -c:a libmp3lame -id3v2_version 3  -metadata:s:v comment="Cover (front)"  -metadata track=$i -metadata title="$CHAPTER_TITLE" -metadata album_artist="$BOOK_AUTHOR" -metadata artist="$BOOK_AUTHOR" -metadata album="$BOOK_TITLE" -q:a 2 "../MP3/$outfile.mp3" &
+  if [ -f ../Cover.jpg ]; then
+    ffmpeg -loglevel info -ac 1 -channel_layout mono -y -i "$f" -i "../Cover.jpg" -c:v copy -c:a libmp3lame -id3v2_version 3  -metadata:s:v comment="Cover (front)"  -metadata track=$i -metadata title="$CHAPTER_TITLE" -metadata album_artist="$BOOK_AUTHOR" -metadata artist="$BOOK_AUTHOR" -metadata album="$BOOK_TITLE" -q:a 2 "../MP3/$outfile.mp3" &
+  else
+    ffmpeg -loglevel info -ac 1 -channel_layout mono -y -i "$f"  -metadata track=$i -metadata title="$CHAPTER_TITLE" -metadata album_artist="$BOOK_AUTHOR" -metadata artist="$BOOK_AUTHOR" -metadata album="$BOOK_TITLE" -q:a 2 "../MP3/$outfile.mp3" &
+  fi
+
   let i=i+1
 done
 wait
