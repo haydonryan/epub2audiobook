@@ -84,6 +84,10 @@ fn output_to_file(filename: String, contents: &str) {
 fn save_cover(directory: String, doc: &mut EpubDoc<BufReader<File>>) {
     // Get Cover
 
+    if let None = doc.get_cover() {
+        return;
+    }
+
     let cover_data = doc.get_cover().unwrap();
     //let filename = format!("{}/Cover.png", directory);
 
