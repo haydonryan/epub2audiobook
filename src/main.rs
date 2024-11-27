@@ -130,18 +130,15 @@ impl fmt::Display for Epub2AudiobookError {
 ///
 
 fn main() -> Result<(), Epub2AudiobookError> {
-    println!();
-    println!("=========================");
+    println!("\n=========================");
     println!("= EPUB to TXT Converter =");
     println!("=========================");
 
     // Grab Command Line Arguments and print usage if incorrect.
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
-        println!();
-        println!("Usage:");
-        println!("epub2audiobook <epub-filename.epub> <output-directory>");
-        println!();
+        println!("\nUsage:");
+        println!("epub2audiobook <epub-filename.epub> <output-directory>\n");
         //return Err("Incorrect Usage");
         return Err(Epub2AudiobookError::IncorrectNumberOfArguments);
     }
@@ -259,11 +256,8 @@ fn main() -> Result<(), Epub2AudiobookError> {
     //
     //
     // Final loop to output all the files
-    println!();
-    println!();
-    println!("Converting to Chapters");
-    println!("----------------------");
-    println!();
+    println!("\n\nConverting to Chapters");
+    println!("----------------------\n");
     let spine = doc.spine.clone();
     let mut i = 1;
     for current_section in spine {
