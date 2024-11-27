@@ -388,3 +388,20 @@ fn get_title_from_title_tag_returns_blank_if_section_tag_missing() {
         <body epub:type="bodymatter">"#;
     assert_eq!(get_title_from_title_tag(html), "");
 }
+
+#[test]
+fn test_sanitize_filename_empty_string() {
+    assert_eq!("", sanitize_filename(""));
+}
+
+// Colons are not allowed in smb storage.
+#[test]
+fn test_sanitize_filename_replace_colon_with_underscore() {
+    assert_eq!("/chapter__1", sanitize_filename("/chapter: 1"));
+}
+
+// Spaces are not great in some systems.
+#[test]
+fn test_sanitize_filename_replace_space_with_underscore() {
+    assert_eq!("/chapter_1", sanitize_filename("/chapter 1"));
+}
