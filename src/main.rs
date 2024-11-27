@@ -321,9 +321,7 @@ fn main() -> Result<(), Epub2AudiobookError> {
         i += 1;
     }
 
-    println!();
-    println!("Done.");
-    println!();
+    println!("\nDone.\n");
 
     Ok(())
 }
