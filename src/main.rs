@@ -325,3 +325,66 @@ fn main() -> Result<(), Epub2AudiobookError> {
 
     Ok(())
 }
+
+// ************
+// TESTS
+// ************
+
+#[test]
+fn get_title_from_section_tag_handles_empty_string() {
+    assert_eq!(get_title_from_section_tag(""), "");
+}
+
+#[test]
+fn get_title_from_section_tag_returns_title() {
+    let html = r#"<html xmlns="http://www.w3.org/2000/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="en" xml:lang="en">
+        <head>
+        <title>title_tag</title>
+        <link href="../styles/template.css" rel="stylesheet" type="text/css"/>
+        <meta content="urn:uuid" name="meta.content"/>
+        </head>
+        <body epub:type="bodymatter">
+        <section epub:type="bodymatter" id="ch1" title="section_tag">"#;
+    assert_eq!(get_title_from_section_tag(html), "section_tag");
+}
+
+#[test]
+fn get_title_from_section_tag_returns_blank_if_section_tag_missing() {
+    let html = r#"<html xmlns="http://www.w3.org/2000/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="en" xml:lang="en">
+        <head>
+        <title>title_tag</title>
+        <link href="../styles/template.css" rel="stylesheet" type="text/css"/>
+        <meta content="urn:uuid" name="meta.content"/>
+        </head>
+        <body epub:type="bodymatter">"#;
+    assert_eq!(get_title_from_section_tag(html), "");
+}
+
+#[test]
+fn get_title_from_title_tag_handles_empty_string() {
+    assert_eq!(get_title_from_title_tag(""), "");
+}
+
+#[test]
+fn get_title_from_title_tag_returns_title() {
+    let html = r#"<html xmlns="http://www.w3.org/2000/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="en" xml:lang="en">
+        <head>
+        <title>title_tag</title>
+        <link href="../styles/template.css" rel="stylesheet" type="text/css"/>
+        <meta content="urn:uuid" name="meta.content"/>
+        </head>
+        <body epub:type="bodymatter">
+        <section epub:type="bodymatter" id="ch1" title="section_tag">"#;
+    assert_eq!(get_title_from_title_tag(html), "title_tag");
+}
+
+#[test]
+fn get_title_from_title_tag_returns_blank_if_section_tag_missing() {
+    let html = r#"<html xmlns="http://www.w3.org/2000/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="en" xml:lang="en">
+        <head>
+        <link href="../styles/template.css" rel="stylesheet" type="text/css"/>
+        <meta content="urn:uuid" name="meta.content"/>
+        </head>
+        <body epub:type="bodymatter">"#;
+    assert_eq!(get_title_from_title_tag(html), "");
+}
