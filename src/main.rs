@@ -84,7 +84,7 @@ fn output_to_file(filename: String, contents: &str) {
 fn save_cover(directory: String, doc: &mut EpubDoc<BufReader<File>>) {
     // Get Cover
 
-    if let None = doc.get_cover() {
+    if doc.get_cover().is_none() {
         return;
     }
 
