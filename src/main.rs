@@ -405,3 +405,12 @@ fn test_sanitize_filename_replace_colon_with_underscore() {
 fn test_sanitize_filename_replace_space_with_underscore() {
     assert_eq!("/chapter_1", sanitize_filename("/chapter 1"));
 }
+
+#[test]
+fn test_all_strings_the_same() {
+    let strings: Vec<String> = vec!["one".to_string(), "two".to_string(), "three".to_string()];
+    assert!(!all_strings_the_same(&strings));
+
+    let strings: Vec<String> = vec!["one".to_string(), "one".to_string(), "one".to_string()];
+    assert!(all_strings_the_same(&strings));
+}
