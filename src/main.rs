@@ -37,7 +37,7 @@ fn get_title_from_title_tag(html: &str) -> String {
     title.to_owned()
 }
 
-/// Return if all the strings ar ethe same (or empty)
+/// Return if all the strings are the same (or empty)
 ///
 /// # arguments
 /// * `strings` - A Vector of strings to search
@@ -103,6 +103,12 @@ fn save_cover(directory: String, doc: &mut EpubDoc<BufReader<File>>) {
     let _resp = f.write_all(&cover_data.0);
 }
 
+/// Removes invalid characters from filenames
+///
+/// # Arguments
+/// * `input` - The string slice of the filename to sanitize
+/// # Returns
+/// String of the sanitized filename
 fn sanitize_filename(input: &str) -> String {
     let re = Regex::new(r"[^a-zA-Z0-9_\.\-\/]").unwrap();
     re.replace_all(input, "_").to_string()
