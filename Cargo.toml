@@ -10,3 +10,18 @@ authors = ["Haydon Ryan <haydon.ryan@gmail.com>"]
 epub = "2.1.2"
 regex = "1.11.1"
 scraper = "0.21.0"
+
+[profile.release]
+opt-level = 2
+strip = true
+lto = true
+codegen-units = 1
+
+[package.metadata.deb]
+depends = "$auto"
+maintainer = "Haydon Ryan <haydon.ryan@gmail.com>"
+section = "utility"
+priority = "optional"
+assets = [
+  ["target/release/ebook2audiobook", "usr/bin/", "755"],
+]
