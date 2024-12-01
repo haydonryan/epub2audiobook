@@ -2,6 +2,9 @@
 name = "ebook2audiobook"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+repository = "https://github.com/haydonryan/epub2audiobook"
+authors = ["Haydon Ryan <haydon.ryan@gmail.com>"]
 
 [dependencies]
 epub = "2.1.2"
