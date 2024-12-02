@@ -1,0 +1,65 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+permissions:
+  contents: write
+
+jobs:
+  Create-Release:
+    name: Create-Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get the tag name
+        if: env.VERSION == ''
+        run: echo "VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+      - name: Print Version
+        run: echo "$VERSION"
+      - name: Print Cargo Version
+        run: cargo -V
+      - name: Package Version
+        run: echo "PKG_VERSION=$(cargo metadata --no-deps --format-version 1 | jq '.packages[0].version' | head -n 1)" >> $GITHUB_ENV
+      - name: Print Package Version
+        run: echo "$PKG_VERSION"
+      - name: Check Version
+        run: |
+          if ! [ "$PKG_VERSION" == "${VERSION#v}" ]; then
+            echo "Cargo package version does not match tag"
+            # exit 1
+          fi
+      - name: Print Cargo Version
+        run: cargo -V
+      - name: Create Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create $VERSION --draft --verify-tag --title $VERSION --generate-notes
+    outputs:
+      version: ${{ env.VERSION }}
+      pkg_version: ${{ env.PKG_VERSION }}
+
+  Build:
+    name: Build-Packages
+    needs: ['Create-Release']
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{needs.Create-Release.outputs.version}}
+      PKG_VERSION: ${{needs.Create-Release.outputs.pkg_version}}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install cargo-deb
+        run: cargo install cargo-deb
+
+      - name: Build Binary
+        run: cargo build --release
+
+      - name: Build Deb Package
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cargo deb
+          gh release upload "$VERSION" ./target/debian/ebook2audiobook_${{ env.PKG_VERSION }}-1_amd64.deb
