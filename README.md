@@ -18,23 +18,40 @@ If you're looking for an all in one that will send the text to Azure TTS and Ope
 Chapter Titles are currently matched with the Table of Contents, if a match does not exist then the internal (to the epub) is used. This works ok, more work here is needed.
 
 ## Installation
-Until I setup CI, you will need to build this from source.
 
+### Ubuntu (and other Debian based Linux distributions)
+1. Grab the latest [release](https://github.com/haydonryan/epub2audiobook/releases)
+
+2. Install the binary
+``` bash
+sudo dpkg -i ebook2audiobook_0.1.0-1_amd64.deb
+```
+
+### Installation from Source.
+Requires the rust toolchain (cargo + rustc)
 ``` bash
 git clone https://github.com/haydonryan/epub2audiobook.git
 cd epub2audiobook
-cargo build
-
 ```
+
+Development is currently done in main, you probably want to check out a specific release.
+``` bash
+git checkout v0.1.0
+```
+Build and install the binary.
+``` bash
+cargo install --path .
+```
+
+
 ## Converting Books (Usage)
 You will need [PiperTTS](https://github.com/rhasspy/piper) and [FFmpeg](https://www.ffmpeg.org/) installed.
 
 After converting a decent amount of books to audiobooks, I found there are really a few steps / checkpoints.
 1. Initial Conversion from EPUB -> Text
 
-
-    ``` bash
-    cargo run <epub-filename.epub> <output directory>
+   ``` bash
+   ebook2audiobook <epub-filename.epub> <output directory>
 
     ```
 2. Find and replace text.
