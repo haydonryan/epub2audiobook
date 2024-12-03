@@ -63,3 +63,32 @@ jobs:
         run: |
           cargo deb
           gh release upload "$VERSION" ./target/debian/ebook2audiobook_${{ env.PKG_VERSION }}-1_amd64.deb
+
+  Build_MacOS:
+    name: Build_MacOS
+    needs: ['Create-Release']
+    runs-on: macos-latest
+    env:
+      VERSION: ${{needs.Create-Release.outputs.version}}
+      PKG_VERSION: ${{needs.Create-Release.outputs.pkg_version}}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build MacOS Apple Silicon
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cargo build --release --target aarch64-apple-darwin
+          mv ./target/aarch64-apple-darwin/release/ebook2audiobook ./target/aarch64-apple-darwin/release/ebook2audiobook_${{ env.PKG_VERSION }}_macosarm
+          gh release upload "$VERSION" ./target/aarch64-apple-darwin/release/ebook2audiobook_${{ env.PKG_VERSION }}_macosarm
+      - name: Install MacOS x86 toolchain
+        run: rustup target add x86_64-apple-darwin
+      - name: Build MacOS x86
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cargo build --release --target x86_64-apple-darwin
+          mv ./target/x86_64-apple-darwin/release/ebook2audiobook ./target/x86_64-apple-darwin/release/ebook2audiobook_${{ env.PKG_VERSION }}_macosx86
+          gh release upload "$VERSION" ./target/x86_64-apple-darwin/release/ebook2audiobook_${{ env.PKG_VERSION }}_macosx86
+          ls -la ./target/x86_64-apple-darwin/release/
