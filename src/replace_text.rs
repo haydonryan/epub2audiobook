@@ -13,6 +13,14 @@ fn convert_money_to_words(text: &str) -> String {
     re.replace_all(&search_text, "$m dollars").to_string()
 }
 
+fn clean_text(text: &str) -> String {
+    let re = Regex::new(r"@BRK#").unwrap();
+    let search_text = re.replace_all(text, ".").to_string();
+    let re = Regex::new(r"\s+\n").unwrap();
+    let search_text = re.replace_all(&search_text, "\n").to_string();
+    let re = Regex::new(r"\n+").unwrap();
+    re.replace_all(&search_text, "\n").to_string()
+}
 #[test]
 fn test_convert_money_to_words() {
     // Special Case for a singular
@@ -60,4 +68,22 @@ fn test_convert_money_to_words() {
         "1,000,000 dollars".to_string(),
         convert_money_to_words(text)
     );
+}
+
+#[test]
+fn test_strip_additional_new_lines() {
+    let text = "\n\n\n\n";
+    assert_eq!(clean_text(text), "\n".to_string());
+}
+
+#[test]
+fn test_convert_break_to_periods() {
+    let text = "@BRK#";
+    assert_eq!(clean_text(text), ".".to_string());
+}
+
+#[test]
+fn test_strip_spaces_at_end_of_line() {
+    let text = " \n";
+    assert_eq!(clean_text(text), "\n".to_string());
 }
