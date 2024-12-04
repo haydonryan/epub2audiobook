@@ -12,7 +12,10 @@ fn process_line(text: &str) -> (String, String) {
     match ret {
         Some((x, y)) => return (x.to_string(), y.to_string()),
         None => {
-            println!("Ignoring line, no '==' found: {}", text);
+            println!(
+                "Custom Replacements File Syntax error - Ignoring line, no '==' found: {}",
+                text
+            );
             ("".to_string(), "".to_string())
         }
     }
