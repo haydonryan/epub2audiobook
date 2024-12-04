@@ -21,6 +21,45 @@ fn clean_text(text: &str) -> String {
     let re = Regex::new(r"\n+").unwrap();
     re.replace_all(&search_text, "\n").to_string()
 }
+
+fn conver_speed_from_acronyms_to_full_text(text: &str) -> String {
+    // KPH
+    let re = Regex::new(r"kph").unwrap();
+    let search_text = re.replace_all(text, "kilometers per hour").to_string();
+
+    let re = Regex::new(r"k\.p\.h\.\n").unwrap();
+    let search_text = re
+        .replace_all(&search_text, "kilometers per hour.\n")
+        .to_string();
+
+    let re = Regex::new(r"k\.p\.h\.(\s+[A-Z])").unwrap();
+    let search_text = re
+        .replace_all(&search_text, "kilometers per hour.$1")
+        .to_string();
+
+    let re = Regex::new(r"k\.p\.h\.").unwrap();
+    let search_text = re
+        .replace_all(&search_text, "kilometers per hour")
+        .to_string();
+
+    // MPH
+    let re = Regex::new(r"mph").unwrap();
+    let search_text = re.replace_all(&search_text, "miles per hour").to_string();
+
+    let re = Regex::new(r"m\.p\.h\.\n").unwrap();
+    let search_text = re
+        .replace_all(&search_text, "miles per hour.\n")
+        .to_string();
+
+    let re = Regex::new(r"m\.p\.h\.(\s+[A-Z])").unwrap();
+    let search_text = re
+        .replace_all(&search_text, "miles per hour.$1")
+        .to_string();
+
+    let re = Regex::new(r"m\.p\.h\.").unwrap();
+    re.replace_all(&search_text, "miles per hour").to_string()
+}
+
 #[test]
 fn test_convert_money_to_words() {
     // Special Case for a singular
@@ -86,4 +125,57 @@ fn test_convert_break_to_periods() {
 fn test_strip_spaces_at_end_of_line() {
     let text = " \n";
     assert_eq!(clean_text(text), "\n".to_string());
+}
+
+#[test]
+fn test_convert_speed_acronyms() {
+    let text = "kph";
+    assert_eq!(
+        conver_speed_from_acronyms_to_full_text(text),
+        "kilometers per hour".to_string()
+    );
+
+    let text = "k.p.h.";
+    assert_eq!(
+        conver_speed_from_acronyms_to_full_text(text),
+        "kilometers per hour".to_string()
+    );
+    // Check for m.p.h. being at end of sentence, and keep period
+    let text = "k.p.h. The";
+    assert_eq!(
+        conver_speed_from_acronyms_to_full_text(text),
+        "kilometers per hour. The".to_string()
+    );
+
+    // Check for m.p.h. being at end of a paragraph, and keep period
+    let text = "k.p.h.\n";
+    assert_eq!(
+        conver_speed_from_acronyms_to_full_text(text),
+        "kilometers per hour.\n".to_string()
+    );
+
+    let text = "mph";
+    assert_eq!(
+        conver_speed_from_acronyms_to_full_text(text),
+        "miles per hour".to_string()
+    );
+
+    let text = "m.p.h.";
+    assert_eq!(
+        conver_speed_from_acronyms_to_full_text(text),
+        "miles per hour".to_string()
+    );
+    // Check for m.p.h. being at end of sentence, and keep period
+    let text = "m.p.h. The";
+    assert_eq!(
+        conver_speed_from_acronyms_to_full_text(text),
+        "miles per hour. The".to_string()
+    );
+
+    // Check for m.p.h. being at end of a paragraph, and keep period
+    let text = "m.p.h.\n";
+    assert_eq!(
+        conver_speed_from_acronyms_to_full_text(text),
+        "miles per hour.\n".to_string()
+    );
 }
