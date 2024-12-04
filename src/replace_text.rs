@@ -110,6 +110,15 @@ fn test_convert_money_to_words() {
 }
 
 #[test]
+fn test_convert_money_to_words_multiple_times() {
+    let text = "from $1000 to $1,000,000";
+    assert_eq!(
+        "from 1000 dollars to 1,000,000 dollars".to_string(),
+        convert_money_to_words(text)
+    );
+}
+
+#[test]
 fn test_strip_additional_new_lines() {
     let text = "\n\n\n\n";
     assert_eq!(clean_text(text), "\n".to_string());
