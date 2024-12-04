@@ -1,4 +1,5 @@
 use regex::Regex;
+use std::fs;
 
 fn process_line(text: &str) -> (String, String) {
     if let None = text.chars().next() {
@@ -34,6 +35,20 @@ fn process_user_replacements(text: &str, replacements: Vec<(String, String)>) ->
         ret = re.replace_all(&ret, &replace.1).to_string();
     }
     ret.to_string()
+}
+
+fn load_custom_replacements(filename: &str) -> Option<Vec<(String, String)>> {
+    let file_result = fs::read_to_string(filename);
+    match file_result {
+        Ok(file_text) => {
+            println!("Opening custom user replacements: {}", filename);
+            Some(process_file_text(&file_text))
+        }
+        Err(error) => {
+            eprintln!("Unable to open file: {} {}", error, filename);
+            None
+        }
+    }
 }
 
 #[test]
