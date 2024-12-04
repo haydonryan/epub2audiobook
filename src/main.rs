@@ -9,6 +9,8 @@ use std::io::Write;
 use std::path::Path;
 use std::str;
 
+mod replace_text;
+
 fn get_title_from_section_tag(html: &str) -> String {
     let document = Html::parse_document(html);
     let selector = Selector::parse("section").unwrap();
