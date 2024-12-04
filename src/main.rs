@@ -9,6 +9,7 @@ use std::io::Write;
 use std::path::Path;
 use std::str;
 
+mod custom_replacements;
 mod replace_text;
 
 fn get_title_from_section_tag(html: &str) -> String {
