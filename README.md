@@ -56,7 +56,7 @@ After converting a decent amount of books to audiobooks, I found there are reall
     ```
 2. Find and replace text.
 
-    Piper doesn't handle certain phrases in 'typical' way eg most of us would read 1904 as 19 O 4, but piper reads it as one thousand nine hundred and four.  This step is critical for enjoyment of the book. (bash script)
+    Piper doesn't handle certain phrases in 'typical' way eg most of us would read 1904 as 19 O 4, but piper reads it as one thousand nine hundred and four.  This step is critical for enjoyment of the book. (bash script).  For information on adding your own regular expressions see [Wikipedia](https://en.wikipedia.org/wiki/Regular_expression).
     ``` bash
     <coming soon>
     ```
