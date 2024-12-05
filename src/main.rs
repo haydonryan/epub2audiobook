@@ -106,6 +106,40 @@ fn save_cover(directory: String, doc: &mut EpubDoc<BufReader<File>>) {
     let _resp = f.write_all(&cover_data.0);
 }
 
+/// Creates the directory structure
+///
+/// original-text: original txt files before replacement
+/// HTML: Original HTML chapter rip
+/// MP3
+/// WAV
+///
+/// # Arguments
+/// * `output_directory: the name of the base output directory
+/// # Returns
+/// * Nothing
+fn create_directory_structure(output_directory: String) {
+    let original_text_directory = output_directory.clone() + "/original-text";
+    let html_directory = output_directory.clone() + "/HTML";
+    let mp3_directory = output_directory.clone() + "/MP3";
+    let wav_directory = output_directory.clone() + "/WAV";
+
+    if !Path::new(&output_directory).exists() {
+        std::fs::create_dir(output_directory).unwrap();
+    }
+    if !Path::new(&original_text_directory).exists() {
+        std::fs::create_dir(original_text_directory).unwrap();
+    }
+    if !Path::new(&html_directory).exists() {
+        std::fs::create_dir(html_directory).unwrap();
+    }
+    if !Path::new(&mp3_directory).exists() {
+        std::fs::create_dir(mp3_directory).unwrap();
+    }
+    if !Path::new(&wav_directory).exists() {
+        std::fs::create_dir(wav_directory).unwrap();
+    }
+}
+
 /// Removes invalid characters from filenames
 ///
 /// # Arguments
@@ -154,10 +188,7 @@ fn main() -> Result<(), Epub2AudiobookError> {
     let filename = &args[1];
     let output_directory = &args[2];
 
-    // Check if directory already exists if it doesn't then create it.
-    if !Path::new(output_directory).exists() {
-        std::fs::create_dir(output_directory).unwrap();
-    }
+    create_directory_structure(output_directory.to_string());
 
     // Load the EPUB
     let doc = EpubDoc::new(filename);
