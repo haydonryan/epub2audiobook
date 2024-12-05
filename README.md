@@ -81,11 +81,11 @@ After converting a decent amount of books to audiobooks, I found there are reall
     ```
     This will encode all WAV files in the WAV directory. Files are placed into an MP3 Directory, Simply move them to your audiobookshelf folder and they will appear.
 
-## Todo
-- Add unit tests
-- Add integration tests
-- Setup CI to build releases
-
+## Roadmap
+- Integrate text replacement (in progress)
+- Improve title extraction
+- Publishing deb to apt repository
+- Publishing binary to AUR
 
 ## Why does this project exist?
 I've spent a bunch of my spare time learning the Rust programming language.
