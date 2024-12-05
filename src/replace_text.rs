@@ -1,6 +1,6 @@
 use regex::Regex;
 
-fn convert_money_to_words(text: &str) -> String {
+pub fn convert_money_to_words(text: &str) -> String {
     let re = Regex::new(r"\$1$").unwrap();
     let search_text = re.replace_all(text, "one dollar").to_string();
     println!("1: {}", search_text);
@@ -13,7 +13,7 @@ fn convert_money_to_words(text: &str) -> String {
     re.replace_all(&search_text, "$m dollars").to_string()
 }
 
-fn clean_text(text: &str) -> String {
+pub fn clean_text(text: &str) -> String {
     let re = Regex::new(r"@BRK#").unwrap();
     let search_text = re.replace_all(text, ".").to_string();
     let re = Regex::new(r"\s+\n").unwrap();
@@ -22,7 +22,7 @@ fn clean_text(text: &str) -> String {
     re.replace_all(&search_text, "\n").to_string()
 }
 
-fn conver_speed_from_acronyms_to_full_text(text: &str) -> String {
+pub fn convert_speed_from_acronyms_to_full_text(text: &str) -> String {
     // KPH
     let re = Regex::new(r"kph").unwrap();
     let search_text = re.replace_all(text, "kilometers per hour").to_string();

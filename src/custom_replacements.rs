@@ -40,7 +40,7 @@ fn process_user_replacements(text: &str, replacements: Vec<(String, String)>) ->
     ret.to_string()
 }
 
-fn load_custom_replacements(filename: &str) -> Option<Vec<(String, String)>> {
+pub fn load_custom_replacements(filename: &str) -> Option<Vec<(String, String)>> {
     let file_result = fs::read_to_string(filename);
     match file_result {
         Ok(file_text) => {
