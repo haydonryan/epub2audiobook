@@ -343,12 +343,12 @@ fn main() -> Result<(), Epub2AudiobookError> {
 
         let document = Html::parse_document(html);
         let selector = Selector::parse("body").unwrap();
-        let _text: String = document
+        let text: String = document
             .select(&selector)
             .flat_map(|element| element.text().collect::<Vec<_>>())
             .collect::<String>();
 
-        output_to_file(filename.clone() + ".txt", &_text);
+        output_to_file(filename.clone() + ".txt", &text);
 
         output_to_file(filename + ".html", html);
 
