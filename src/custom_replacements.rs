@@ -30,7 +30,7 @@ fn process_file_text(text: &str) -> Vec<(String, String)> {
     ret
 }
 
-fn process_user_replacements(text: &str, replacements: Vec<(String, String)>) -> String {
+pub fn process_user_replacements(text: &str, replacements: &Vec<(String, String)>) -> String {
     let mut ret = text.to_string();
 
     for replace in replacements {
@@ -112,6 +112,6 @@ fn should_apply_all_replacements() {
 
     let text = "hi there, word to your brother";
     let expected = "hello there, WORD to your brother";
-    let result = process_user_replacements(text, replacements);
+    let result = process_user_replacements(text, &replacements);
     assert_eq!(expected, result);
 }
