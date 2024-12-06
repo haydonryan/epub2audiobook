@@ -165,14 +165,15 @@ fn extract_text_from_html(html: &str) -> String {
         .flat_map(|element| element.text().collect::<Vec<_>>())
         .collect::<String>()
 }
+
+/// Builds a list of chapter titles to use as filenames, and metadata
+///
+/// # Arguments
+/// * `doc` - the epub document
+/// # Returns
+/// Vector of all the chapter titles (note can contain empty strings, if wasn't able to determine a
+/// chapter title.
 fn get_chapter_titles(doc: &mut EpubDoc<BufReader<File>>) -> Vec<String> {
-    //
-    // Grab metadata from document to help determine titles
-    //
-    //
-    println!("Grabbing all title options for book");
-    println!("-----------------------------------");
-    println!();
     let number_of_ids = doc.spine.len();
     let mut title_tag_titles: Vec<String> = Vec::new();
     let mut section_tag_titles: Vec<String> = Vec::new();
@@ -238,30 +239,30 @@ fn get_chapter_titles(doc: &mut EpubDoc<BufReader<File>>) -> Vec<String> {
     //dbg!(section_tag_titles);
 }
 
-fn convert_book(doc: &mut EpubDoc<BufReader<File>>, output_directory: &str) {
-    let titles = get_chapter_titles(doc);
+/// Performs the final processing and outputting of files
+///
+/// # Arguments
+/// * `doc` - the epub document
+/// * `titles` - all the chapter titles
+/// * `output_directory` - directory to write to.
+/// # Returns nothing
+fn convert_book(doc: &mut EpubDoc<BufReader<File>>, titles: Vec<String>, output_directory: &str) {
     let number_of_ids = doc.spine.len();
 
-    //
-    //
-    //
-    //
-    //
-    // Final loop to output all the files
-    println!("\n\nConverting to Chapters");
-    println!("----------------------\n");
     let spine = doc.spine.clone();
     let mut i = 1;
     for current_section in spine {
         let path = doc.resources.get(&current_section).unwrap().0.clone();
         let text = doc.get_resource_by_path(&path).unwrap();
         let html = str::from_utf8(&text).unwrap();
-        let mut filename = format!("{}/{:04}_{}", output_directory, i, current_section);
-        filename = sanitize_filename(&filename);
+        let mut filename = format!(
+            "{}/{:04}_{}",
+            output_directory,
+            i,
+            sanitize_filename(&current_section)
+        );
 
         let title = titles[i - 1].clone();
-
-        //println!("  - Title from TOC Tag: <{}>", toc_title);
         if title.len() > 2 {
             filename = format!("{}/{:04}_{}", output_directory, i, title);
             filename = sanitize_filename(&filename);
@@ -270,11 +271,10 @@ fn convert_book(doc: &mut EpubDoc<BufReader<File>>, output_directory: &str) {
             output_to_file(filename.clone() + ".title", &current_section);
         }
 
-        print!(
-            "Converting Chapter {:>3}/{}: {:<21} ",
-            i, number_of_ids, current_section,
+        println!(
+            "Converting Chapter {:>3}/{}: {:<21} Title Source: TOC    Filename: {}",
+            i, number_of_ids, current_section, filename
         );
-        println!("Title Source: TOC    Filename: {}", filename);
 
         let text = extract_text_from_html(html);
         output_to_file(filename.clone() + ".txt", &text);
@@ -285,6 +285,13 @@ fn convert_book(doc: &mut EpubDoc<BufReader<File>>, output_directory: &str) {
     }
 }
 
+/// Create a bash script to provide environment variables for later steps
+///
+/// # Arguments
+/// * `output_directory` - directory to write to.
+/// * `title` - title of the book
+/// * `author` - author of the book
+/// # Returns nothing
 fn create_bash_environment(output_directory: &str, title: &str, author: &str) {
     let includes = format!(
         "#!/bin/bash\n \
@@ -356,8 +363,16 @@ fn main() -> Result<(), Epub2AudiobookError> {
     // Save a file that has title, and author predefined for ffmpeg later on
     create_bash_environment(output_directory, &title.unwrap(), &author.unwrap());
 
+    // Get chapter titles
+    println!("Grabbing all title options for book");
+    println!("-----------------------------------\n");
+    let titles = get_chapter_titles(&mut doc);
+
     // Perform the epub to txt conversion
-    convert_book(&mut doc, output_directory);
+    println!("\n\nConverting to Chapters");
+    println!("----------------------\n");
+
+    convert_book(&mut doc, titles, output_directory);
 
     println!("\nDone.\n");
 
