@@ -151,6 +151,21 @@ fn sanitize_filename(input: &str) -> String {
     re.replace_all(input, "_").to_string()
 }
 
+/// Extracts text stream from html
+///
+/// # Arguments
+/// * `html` - String to convert
+/// # Returns
+/// String of unfiltered text
+fn extract_text_from_html(html: &str) -> String {
+    let document = Html::parse_document(html);
+    let selector = Selector::parse("body").unwrap();
+    document
+        .select(&selector)
+        .flat_map(|element| element.text().collect::<Vec<_>>())
+        .collect::<String>()
+}
+
 // Errors for main
 
 #[derive(Debug)]
@@ -341,13 +356,7 @@ fn main() -> Result<(), Epub2AudiobookError> {
         //let section_title = get_title_from_section_tag(html);
         //println!("  - Title from Section Tag: <{}>", section_title);
 
-        let document = Html::parse_document(html);
-        let selector = Selector::parse("body").unwrap();
-        let text: String = document
-            .select(&selector)
-            .flat_map(|element| element.text().collect::<Vec<_>>())
-            .collect::<String>();
-
+        let text = extract_text_from_html(html);
         output_to_file(filename.clone() + ".txt", &text);
 
         output_to_file(filename + ".html", html);
