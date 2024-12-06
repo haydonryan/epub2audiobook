@@ -282,6 +282,18 @@ fn convert_book(mut doc: EpubDoc<BufReader<File>>, output_directory: &str) {
     }
 }
 
+fn create_bash_environment(output_directory: &str, title: &str, author: &str) {
+    let includes = format!(
+        "#!/bin/bash\n \
+                            export BOOK_TITLE=\"{}\" \n \
+                            export BOOK_AUTHOR=\"{}\" \n \
+                            export BOOK_COVER=\"{}\" \n",
+        title, author, "cover"
+    );
+    // Save the book Title, Author and CoverName to bash script
+    output_to_file(output_directory.to_string() + "/book.sh", &includes);
+}
+
 // Errors for main
 
 #[derive(Debug)]
@@ -338,17 +350,7 @@ fn main() -> Result<(), Epub2AudiobookError> {
     println!("Number of Sections: {}", number_of_ids);
     println!("Number of Items in TOC: {}\n", number_of_toc);
 
-    let includes = format!(
-        "#!/bin/bash\n \
-                            export BOOK_TITLE=\"{}\" \n \
-                            export BOOK_AUTHOR=\"{}\" \n \
-                            export BOOK_COVER=\"{}\" \n",
-        title.unwrap(),
-        author.unwrap(),
-        "cover"
-    );
-    // Save the book Title, Author and CoverName to bash script
-    output_to_file(output_directory.to_string() + "/book.sh", &includes);
+    create_bash_environment(output_directory, &title.unwrap(), &author.unwrap());
 
     convert_book(doc, output_directory);
 
