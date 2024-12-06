@@ -2,15 +2,15 @@ use regex::Regex;
 use std::fs;
 
 fn process_line(text: &str) -> (String, String) {
-    if let None = text.chars().next() {
+    if text.chars().next().is_none() {
         return ("".to_string(), "".to_string());
     }
-    if text.chars().next().unwrap() == '#' {
+    if text.starts_with('#') {
         return ("".to_string(), "".to_string());
     }
     let ret = text.split_once("==");
     match ret {
-        Some((x, y)) => return (x.to_string(), y.to_string()),
+        Some((x, y)) => (x.to_string(), y.to_string()),
         None => {
             println!(
                 "Custom Replacements File Syntax error - Ignoring line, no '==' found: {}",

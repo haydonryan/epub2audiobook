@@ -183,10 +183,9 @@ impl fmt::Display for Epub2AudiobookError {
     }
 }
 
-///
-/// Main Function
-///
-
+//
+// Main Function
+//
 fn main() -> Result<(), Epub2AudiobookError> {
     println!("\n=========================");
     println!("= EPUB to TXT Converter =");
@@ -197,7 +196,6 @@ fn main() -> Result<(), Epub2AudiobookError> {
     if args.len() < 2 {
         println!("\nUsage:");
         println!("epub2audiobook <epub-filename.epub> <output-directory>\n");
-        //return Err("Incorrect Usage");
         return Err(Epub2AudiobookError::IncorrectNumberOfArguments);
     }
     let filename = &args[1];
@@ -222,9 +220,7 @@ fn main() -> Result<(), Epub2AudiobookError> {
     println!("Title: {}", title.clone().unwrap());
     println!("Author: {}", author.clone().unwrap());
     println!("Number of Sections: {}", number_of_ids);
-    println!("Number of Items in TOC: {}", number_of_toc);
-
-    println!();
+    println!("Number of Items in TOC: {}\n", number_of_toc);
 
     let includes = format!(
         "#!/bin/bash\n \
@@ -253,7 +249,6 @@ fn main() -> Result<(), Epub2AudiobookError> {
         let path = doc.resources.get(&current_section).unwrap().0.clone();
         let text = doc.get_resource_by_path(path.clone()).unwrap();
         let html = str::from_utf8(&text).unwrap();
-        //let toc = doc.toc.clone();
 
         let p: String = path.to_string_lossy().into();
         println!(
@@ -289,8 +284,8 @@ fn main() -> Result<(), Epub2AudiobookError> {
     }
 
     println!("Applying Rules to decide Title Source");
-    println!("-------------------------------------");
-    println!();
+    println!("-------------------------------------\n");
+
     if all_strings_the_same(&title_tag_titles) {
         // Title tag is the same - don't use.
         println!("Title Tags all the same or all empty, don't use");
