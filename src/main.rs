@@ -175,13 +175,12 @@ fn convert_book(mut doc: EpubDoc<BufReader<File>>, output_directory: &str) {
     println!("-----------------------------------");
     println!();
     let number_of_ids = doc.spine.len();
-    let number_of_toc = doc.toc.len();
     let mut title_tag_titles: Vec<String> = Vec::new();
     let mut section_tag_titles: Vec<String> = Vec::new();
     let mut toc_titles: Vec<String> = Vec::new();
-    //let mut titles: Vec<String> = Vec::new();
     let spine = doc.spine.clone();
     let mut i = 1;
+
     for current_section in spine {
         let path = doc.resources.get(&current_section).unwrap().0.clone();
         let text = doc.get_resource_by_path(path.clone()).unwrap();
@@ -342,16 +341,18 @@ fn main() -> Result<(), Epub2AudiobookError> {
     let number_of_ids = doc.spine.len();
     let number_of_toc = doc.toc.len();
 
-    // Save the book cover to the output directory
-    save_cover(output_directory.to_string(), &mut doc);
-
     println!("Title: {}", title.clone().unwrap());
     println!("Author: {}", author.clone().unwrap());
     println!("Number of Sections: {}", number_of_ids);
     println!("Number of Items in TOC: {}\n", number_of_toc);
 
+    // Save the book cover to the output directory
+    save_cover(output_directory.to_string(), &mut doc);
+
+    // Save a file that has title, and author predefined for ffmpeg later on
     create_bash_environment(output_directory, &title.unwrap(), &author.unwrap());
 
+    // Perform the epub to txt conversion
     convert_book(doc, output_directory);
 
     println!("\nDone.\n");
