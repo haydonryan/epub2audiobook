@@ -179,28 +179,26 @@ fn get_chapter_titles(doc: &mut EpubDoc<BufReader<File>>) -> Vec<String> {
     let mut section_tag_titles: Vec<String> = Vec::new();
     let mut toc_titles: Vec<String> = Vec::new();
     let spine = doc.spine.clone();
-    let mut i = 1;
 
-    for current_section in spine {
-        let path = doc.resources.get(&current_section).unwrap().0.clone();
-        let text = doc.get_resource_by_path(path.clone()).unwrap();
+    for (i, current_section) in spine.iter().enumerate() {
+        let path = doc.resources.get(current_section).unwrap().0.clone();
+        let text = doc.get_resource_by_path(&path).unwrap();
         let html = str::from_utf8(&text).unwrap();
+        let chapter_number = i + 1;
 
-        let p: String = path.to_string_lossy().into();
+        let path_string: String = path.to_string_lossy().into();
         println!(
             "Processing chapter {}/{}: Section Name: {} Path: {}",
-            i, number_of_ids, current_section, p,
+            chapter_number, number_of_ids, current_section, path_string,
         );
 
         // Find matching TOC entries, otherwise push an empty string
-        let mut toc_title = "";
-        for d in &doc.toc {
-            let toc_path: String = d.content.to_string_lossy().into();
-            if toc_path.contains(&p) {
-                //println!("Match: {} vs {} = {}", toc_path, p, d.label);
-                toc_title = &d.label;
-            }
-        }
+        let toc_title = doc
+            .toc
+            .iter()
+            .find(|toc| toc.content.to_string_lossy().contains(&path_string))
+            .map(|toc| toc.label.clone())
+            .unwrap_or_default();
 
         toc_titles.push(toc_title.to_string());
         println!("  - Title from TOC Tag: <{}>", toc_title);
@@ -215,9 +213,7 @@ fn get_chapter_titles(doc: &mut EpubDoc<BufReader<File>>) -> Vec<String> {
 
         let section_tag_title = get_title_from_section_tag(html);
         section_tag_titles.push(section_tag_title.clone());
-        println!("  - Title from Section Tag: <{}>", section_tag_title);
-        println!();
-        i += 1;
+        println!("  - Title from Section Tag: <{}>\n", section_tag_title);
     }
 
     println!("Applying Rules to decide Title Source");
