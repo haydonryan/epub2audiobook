@@ -165,8 +165,7 @@ fn extract_text_from_html(html: &str) -> String {
         .flat_map(|element| element.text().collect::<Vec<_>>())
         .collect::<String>()
 }
-
-fn convert_book(mut doc: EpubDoc<BufReader<File>>, output_directory: &str) {
+fn get_chapter_titles(doc: &mut EpubDoc<BufReader<File>>) -> Vec<String> {
     //
     // Grab metadata from document to help determine titles
     //
@@ -234,10 +233,15 @@ fn convert_book(mut doc: EpubDoc<BufReader<File>>, output_directory: &str) {
         println!("Section Tags all the same or all empty, don't use");
     }
     println!("Hardcoded to use TOC Tags for now.");
-    let titles = toc_titles;
-
+    //let titles = toc_titles;
+    toc_titles
     //dbg!(section_tag_titles);
-    //
+}
+
+fn convert_book(doc: &mut EpubDoc<BufReader<File>>, output_directory: &str) {
+    let titles = get_chapter_titles(doc);
+    let number_of_ids = doc.spine.len();
+
     //
     //
     //
@@ -353,7 +357,7 @@ fn main() -> Result<(), Epub2AudiobookError> {
     create_bash_environment(output_directory, &title.unwrap(), &author.unwrap());
 
     // Perform the epub to txt conversion
-    convert_book(doc, output_directory);
+    convert_book(&mut doc, output_directory);
 
     println!("\nDone.\n");
 
