@@ -140,51 +140,51 @@ fn test_strip_spaces_at_end_of_line() {
 fn test_convert_speed_acronyms() {
     let text = "kph";
     assert_eq!(
-        conver_speed_from_acronyms_to_full_text(text),
+        convert_speed_from_acronyms_to_full_text(text),
         "kilometers per hour".to_string()
     );
 
     let text = "k.p.h.";
     assert_eq!(
-        conver_speed_from_acronyms_to_full_text(text),
+        convert_speed_from_acronyms_to_full_text(text),
         "kilometers per hour".to_string()
     );
     // Check for m.p.h. being at end of sentence, and keep period
     let text = "k.p.h. The";
     assert_eq!(
-        conver_speed_from_acronyms_to_full_text(text),
+        convert_speed_from_acronyms_to_full_text(text),
         "kilometers per hour. The".to_string()
     );
 
     // Check for m.p.h. being at end of a paragraph, and keep period
     let text = "k.p.h.\n";
     assert_eq!(
-        conver_speed_from_acronyms_to_full_text(text),
+        convert_speed_from_acronyms_to_full_text(text),
         "kilometers per hour.\n".to_string()
     );
 
     let text = "mph";
     assert_eq!(
-        conver_speed_from_acronyms_to_full_text(text),
+        convert_speed_from_acronyms_to_full_text(text),
         "miles per hour".to_string()
     );
 
     let text = "m.p.h.";
     assert_eq!(
-        conver_speed_from_acronyms_to_full_text(text),
+        convert_speed_from_acronyms_to_full_text(text),
         "miles per hour".to_string()
     );
     // Check for m.p.h. being at end of sentence, and keep period
     let text = "m.p.h. The";
     assert_eq!(
-        conver_speed_from_acronyms_to_full_text(text),
+        convert_speed_from_acronyms_to_full_text(text),
         "miles per hour. The".to_string()
     );
 
     // Check for m.p.h. being at end of a paragraph, and keep period
     let text = "m.p.h.\n";
     assert_eq!(
-        conver_speed_from_acronyms_to_full_text(text),
+        convert_speed_from_acronyms_to_full_text(text),
         "miles per hour.\n".to_string()
     );
 }
