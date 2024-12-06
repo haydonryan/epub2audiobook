@@ -471,3 +471,39 @@ fn test_all_strings_the_same() {
     let strings: Vec<String> = vec!["one".to_string(), "one".to_string(), "one".to_string()];
     assert!(all_strings_the_same(&strings));
 }
+
+#[test]
+fn test_loading_chapter_titles() {
+    // Note: Alice in wonderland was obtained from Project Guttenberg (out of copywrite material) as a test book
+    // Alice in wonderland is an example of:
+    // TOC Having good chapter names.
+    // section name having bad titles (see below)
+    // title tag having the book title
+    // Processing chapter 11/15: Section Name: item12 Path: OEBPS/4930335415765774629_11-h-9.htm.xhtml
+    // - Title from TOC Tag: <CHAPTER IX. The Mock Turtle’s Story>
+    // - Title from Title Tag: <Alice’s Adventures in Wonderland | Project Gutenberg>
+    // - Title from Section Tag: <>
+    //                            section name
+    // Converting Chapter   1/15: coverpage-wrapper     Title Source: TOC    Filename: alice-test/0001_coverpage-wrapper
+    // Converting Chapter   2/15: pg-header             Title Source: TOC    Filename: alice-test/0002_Alice_s_Adventures_in_Wonderland
+    // Converting Chapter   3/15: item4                 Title Source: TOC    Filename: alice-test/0003_CHAPTER_I._Down_the_Rabbit-Hole
+    // Converting Chapter   4/15: item5                 Title Source: TOC    Filename: alice-test/0004_CHAPTER_II._The_Pool_of_Tears
+    // Converting Chapter   5/15: item6                 Title Source: TOC    Filename: alice-test/0005_CHAPTER_III._A_Caucus-Race_and_a_Long_Tale
+    // Converting Chapter   6/15: item7                 Title Source: TOC    Filename: alice-test/0006_CHAPTER_IV._The_Rabbit_Sends_in_a_Little_Bill
+    // Converting Chapter   7/15: item8                 Title Source: TOC    Filename: alice-test/0007_CHAPTER_V._Advice_from_a_Caterpillar
+    // Converting Chapter   8/15: item9                 Title Source: TOC    Filename: alice-test/0008_CHAPTER_VI._Pig_and_Pepper
+    // Converting Chapter   9/15: item10                Title Source: TOC    Filename: alice-test/0009_CHAPTER_VII._A_Mad_Tea-Party
+    // Converting Chapter  10/15: item11                Title Source: TOC    Filename: alice-test/0010_CHAPTER_VIII._The_Queen_s_Croquet-Ground
+    // Converting Chapter  11/15: item12                Title Source: TOC    Filename: alice-test/0011_CHAPTER_IX._The_Mock_Turtle_s_Story
+    // Converting Chapter  12/15: item13                Title Source: TOC    Filename: alice-test/0012_CHAPTER_X._The_Lobster_Quadrille
+    // Converting Chapter  13/15: item14                Title Source: TOC    Filename: alice-test/0013_CHAPTER_XI._Who_Stole_the_Tarts_
+    // Converting Chapter  14/15: item15                Title Source: TOC    Filename: alice-test/0014_CHAPTER_XII._Alice_s_Evidence
+    // Converting Chapter  15/15: pg-footer             Title Source: TOC    Filename: alice-test/0015_THE_FULL_PROJECT_GUTENBERG_LICENSE
+    let fixture = "fixtures/alice_in_wonderland_by_lewis_carroll.epub";
+    let doc = EpubDoc::new(fixture);
+    assert!(doc.is_ok());
+    let mut doc = doc.unwrap();
+    let titles = get_chapter_titles(&mut doc);
+
+    assert_eq!(titles[4], "CHAPTER III. A Caucus-Race and a Long Tale");
+}
