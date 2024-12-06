@@ -242,7 +242,12 @@ fn get_chapter_titles(doc: &mut EpubDoc<BufReader<File>>) -> Vec<String> {
 /// * `titles` - all the chapter titles
 /// * `output_directory` - directory to write to.
 /// # Returns nothing
-fn convert_book(doc: &mut EpubDoc<BufReader<File>>, titles: Vec<String>, output_directory: &str) {
+fn convert_book(
+    doc: &mut EpubDoc<BufReader<File>>,
+    titles: Vec<String>,
+    output_directory: &str,
+    custom_replacement_library: Option<Vec<(String, String)>>,
+) {
     let number_of_ids = doc.spine.len();
     let spine = doc.spine.clone();
 
@@ -260,16 +265,10 @@ fn convert_book(doc: &mut EpubDoc<BufReader<File>>, titles: Vec<String>, output_
         };
 
         let filename = if title.len() > 2 {
-            format!(
-                "{}/{:04}_{}",
-                output_directory,
-                chapter_number,
-                sanitize_filename(title)
-            )
+            format!("{:04}_{}", chapter_number, sanitize_filename(title))
         } else {
             format!(
-                "{}/{:04}_{}",
-                output_directory,
+                "{:04}_{}",
                 chapter_number,
                 sanitize_filename(current_section)
             )
@@ -280,12 +279,38 @@ fn convert_book(doc: &mut EpubDoc<BufReader<File>>, titles: Vec<String>, output_
             chapter_number, number_of_ids, current_section, filename
         );
 
-        output_to_file(filename.clone() + ".title", title_to_use);
+        output_to_file(
+            output_directory.to_owned() + "/" + &filename + ".title",
+            title_to_use,
+        );
 
+        output_to_file(
+            output_directory.to_owned() + "/HTML/" + &filename + ".html",
+            html,
+        );
+
+        // Write the original text un changed into the original-text directory
         let text = extract_text_from_html(html);
-        output_to_file(filename.clone() + ".txt", &text);
+        output_to_file(
+            output_directory.to_owned() + "/original-text/" + &filename + ".txt",
+            &text,
+        );
 
-        output_to_file(filename + ".html", html);
+        // Cleanse the original-text using built in changes
+        let mut cleansed_text = replace_text::clean_text(&text);
+        cleansed_text = replace_text::convert_money_to_words(&cleansed_text);
+        cleansed_text = replace_text::convert_speed_from_acronyms_to_full_text(&cleansed_text);
+
+        // Perform Text Custom Replacements
+        if let Some(ref library) = custom_replacement_library {
+            cleansed_text = custom_replacements::process_user_replacements(&cleansed_text, library);
+        }
+
+        // Write the cleansed text to the root output directory
+        output_to_file(
+            output_directory.to_owned() + "/" + &filename + ".txt",
+            &cleansed_text,
+        );
     }
 }
 
@@ -376,7 +401,19 @@ fn main() -> Result<(), Epub2AudiobookError> {
     println!("\n\nConverting to Chapters");
     println!("----------------------\n");
 
-    convert_book(&mut doc, titles, output_directory);
+    let custom_replacement_library =
+        custom_replacements::load_custom_replacements("custom-replacements.conf");
+
+    if custom_replacement_library.is_some() {
+        println!("\nFound custom text replacement library\n");
+    }
+
+    convert_book(
+        &mut doc,
+        titles,
+        output_directory,
+        custom_replacement_library,
+    );
 
     println!("\nDone.\n");
 
