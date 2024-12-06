@@ -1,3 +1,9 @@
 /target
 *.epub
 *.pdf
+
+Cargo.lock
+convert.sh
+custom-replacements.conf
+replace_text.sh
+tts.sh
