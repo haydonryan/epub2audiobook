@@ -248,40 +248,48 @@ fn get_chapter_titles(doc: &mut EpubDoc<BufReader<File>>) -> Vec<String> {
 /// # Returns nothing
 fn convert_book(doc: &mut EpubDoc<BufReader<File>>, titles: Vec<String>, output_directory: &str) {
     let number_of_ids = doc.spine.len();
-
     let spine = doc.spine.clone();
-    let mut i = 1;
-    for current_section in spine {
-        let path = doc.resources.get(&current_section).unwrap().0.clone();
+
+    for (i, current_section) in spine.iter().enumerate() {
+        let path = doc.resources.get(current_section).unwrap().0.clone();
         let text = doc.get_resource_by_path(&path).unwrap();
         let html = str::from_utf8(&text).unwrap();
-        let mut filename = format!(
-            "{}/{:04}_{}",
-            output_directory,
-            i,
-            sanitize_filename(&current_section)
-        );
+        let chapter_number = i + 1;
+        let title = &titles[i];
 
-        let title = titles[i - 1].clone();
-        if title.len() > 2 {
-            filename = format!("{}/{:04}_{}", output_directory, i, title);
-            filename = sanitize_filename(&filename);
-            output_to_file(filename.clone() + ".title", &title);
+        let title_to_use = if title.len() > 2 {
+            title
         } else {
-            output_to_file(filename.clone() + ".title", &current_section);
-        }
+            current_section
+        };
+
+        let filename = if title.len() > 2 {
+            format!(
+                "{}/{:04}_{}",
+                output_directory,
+                chapter_number,
+                sanitize_filename(title)
+            )
+        } else {
+            format!(
+                "{}/{:04}_{}",
+                output_directory,
+                chapter_number,
+                sanitize_filename(current_section)
+            )
+        };
 
         println!(
             "Converting Chapter {:>3}/{}: {:<21} Title Source: TOC    Filename: {}",
-            i, number_of_ids, current_section, filename
+            chapter_number, number_of_ids, current_section, filename
         );
+
+        output_to_file(filename.clone() + ".title", title_to_use);
 
         let text = extract_text_from_html(html);
         output_to_file(filename.clone() + ".txt", &text);
 
         output_to_file(filename + ".html", html);
-
-        i += 1;
     }
 }
 
