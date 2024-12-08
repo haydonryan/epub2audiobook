@@ -3,11 +3,9 @@ use regex::Regex;
 pub fn convert_money_to_words(text: &str) -> String {
     let re = Regex::new(r"\$1$").unwrap();
     let search_text = re.replace_all(text, "one dollar").to_string();
-    println!("1: {}", search_text);
 
     let re = Regex::new(r"\$([1-9][\.]*[0-9]*\s(million|billion|trillion))").unwrap();
     let search_text = re.replace_all(&search_text, "$1 dollars").to_string();
-    println!("2: {}", search_text);
 
     let re = Regex::new(r"\$(?<m>[,0-9]+)").unwrap();
     re.replace_all(&search_text, "$m dollars").to_string()
