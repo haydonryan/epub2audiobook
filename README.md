@@ -54,16 +54,26 @@ After converting a decent amount of books to audiobooks, I found there are reall
    ebook2audiobook <epub-filename.epub> <output directory>
 
     ```
-2. Find and replace text.
+   
+    Find and replace text.
 
-    Piper doesn't handle certain phrases in 'typical' way eg most of us would read 1904 as 19 O 4, but piper reads it as one thousand nine hundred and four.  This step is critical for enjoyment of the book. (bash script).  For information on adding your own regular expressions see [Wikipedia](https://en.wikipedia.org/wiki/Regular_expression).
+    Piper doesn't handle certain phrases in 'typical' way eg most of us would read 1904 as 19 O 4, but piper reads it as one thousand nine hundred and four.
+To ensure you enjoy your audiobooks, Ebook2audiobook now allows for custom replacements. You can create a file named "custom-replacements.conf" in the same folder as your ebook. This file uses regular expressions (learn more on Wikipedia: https://en.wikipedia.org/wiki/Regular_expression ) to specify replacements. Ebook2audiobook will automatically apply these replacements during the conversion process.
     ``` bash
-    <coming soon>
+    $ cat custom-replacements.conf
+   # This is a comment - World War Acryonyms
+   World\ War\ I==World War 1
+   World\ War\ II==World War 2
+   World\ War\ III==World War 3
+   World\ War\ 111==World War 3
     ```
-    Currently TTS is expensive (cost of cloud or cpu time locally).  Converting a book with a large index, contents, appendix is a complete waste.  It's best to manually delete files you don't wnat to convert at this checkpoint.
+
+2.    Delete text and title files you don't want to convert.
+  
+      Currently TTS is expensive (cost of cloud or cpu time locally).  Converting a book with a large index, contents, appendix is a complete waste.  It's best to manually delete files you don't wnat to convert at this checkpoint.
 
 
-3. TXT -> WAV. via Piper TTS
+4. TXT -> WAV. via Piper TTS
     Set TTS_THREADS to something that maxes out your CPU. On a Ryzen 5950x 2-3 works well (they spawn sub threads)
     ``` bash
     export TTS_THREADS=3
@@ -72,7 +82,7 @@ After converting a decent amount of books to audiobooks, I found there are reall
     ls *.txt | xargs --max-procs=$TTS_THREADS -I % sh -c "cat '%' | <path-piper>/piper --length_scale 0.9 --model <model-path-and-file> --output_file 'wav/%.wav'"
     ```
 
-4. WAV -> MP3 via ffmpeg
+5. WAV -> MP3 via ffmpeg
    Currently Piper TTS only outputs wav files. The hardest part about converting these to mp3 is to inject the Title, Author, Chapter Title, and Cover into the ID4 tags of the MP3.
     ``` bash
     # From the output directory, not WAV - Important
