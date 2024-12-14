@@ -15,14 +15,14 @@ pub fn clean_text(text: &str) -> String {
     let re = Regex::new(r"@BRK#").unwrap();
     let search_text = re.replace_all(text, ".").to_string();
 
-    let re = Regex::new(r"^\n+").unwrap();
-    let search_text = re.replace_all(&search_text, "").to_string();
-
     let re = Regex::new(r"\s*\n").unwrap();
     let search_text = re.replace_all(&search_text, "\n").to_string();
 
     let re = Regex::new(r"\n+").unwrap();
-    re.replace_all(&search_text, "\n").to_string()
+    let search_text = re.replace_all(&search_text, "\n").to_string();
+
+    let re = Regex::new(r"^\n+").unwrap();
+    re.replace_all(&search_text, "").to_string()
 }
 
 pub fn convert_speed_from_acronyms_to_full_text(text: &str) -> String {
@@ -140,9 +140,15 @@ fn test_strip_whitespace_only_lines() {
 }
 
 #[test]
+fn should_leave_one_new_line_after_text() {
+    let text = "test\n\ntest";
+    assert_eq!(clean_text(text), "test\ntest".to_string());
+}
+
+#[test]
 fn should_strip_out_multiple_new_lines() {
-    let text = "\n\n\n\n";
-    assert_eq!(clean_text(text), "".to_string());
+    let text = "test\n\n\n\n";
+    assert_eq!(clean_text(text), "test\n".to_string());
 }
 
 #[test]
@@ -153,8 +159,8 @@ fn test_convert_break_to_periods() {
 
 #[test]
 fn test_strip_spaces_at_end_of_line() {
-    let text = " \n";
-    assert_eq!(clean_text(text), "\n".to_string());
+    let text = "test \n";
+    assert_eq!(clean_text(text), "test\n".to_string());
 }
 
 #[test]
