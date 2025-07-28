@@ -360,7 +360,7 @@ fn main() -> Result<(), Epub2AudiobookError> {
 
     // Grab Command Line Arguments and print usage if incorrect.
     let args: Vec<String> = env::args().collect();
-    if args.len() < 2 {
+    if args.len() != 3 {
         println!("\nUsage:");
         println!("epub2audiobook <epub-filename.epub> <output-directory>\n");
         return Err(Epub2AudiobookError::IncorrectNumberOfArguments);
