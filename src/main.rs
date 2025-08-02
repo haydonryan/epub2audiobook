@@ -181,7 +181,7 @@ fn get_chapter_titles(doc: &mut EpubDoc<BufReader<File>>) -> Vec<String> {
     let spine = doc.spine.clone();
 
     for (i, current_section) in spine.iter().enumerate() {
-        let path = doc.resources.get(current_section).unwrap().0.clone();
+        let path = doc.resources.get(&current_section.idref).unwrap().0.clone();
         let text = doc.get_resource_by_path(&path).unwrap();
         let html = str::from_utf8(&text).unwrap();
         let chapter_number = i + 1;
@@ -189,7 +189,7 @@ fn get_chapter_titles(doc: &mut EpubDoc<BufReader<File>>) -> Vec<String> {
         let path_string: String = path.to_string_lossy().into();
         println!(
             "Processing chapter {}/{}: Section Name: {} Path: {}",
-            chapter_number, number_of_ids, current_section, path_string,
+            chapter_number, number_of_ids, current_section.idref, path_string,
         );
 
         // Find matching TOC entries, otherwise push an empty string
@@ -252,7 +252,7 @@ fn convert_book(
     let spine = doc.spine.clone();
 
     for (i, current_section) in spine.iter().enumerate() {
-        let path = doc.resources.get(current_section).unwrap().0.clone();
+        let path = doc.resources.get(&current_section.idref).unwrap().0.clone();
         let text = doc.get_resource_by_path(&path).unwrap();
         let html = str::from_utf8(&text).unwrap();
         let chapter_number = i + 1;
@@ -261,7 +261,7 @@ fn convert_book(
         let title_to_use = if title.len() > 2 {
             title
         } else {
-            current_section
+            &current_section.idref
         };
 
         let filename = if title.len() > 2 {
@@ -270,13 +270,13 @@ fn convert_book(
             format!(
                 "{:04}_{}",
                 chapter_number,
-                sanitize_filename(current_section)
+                sanitize_filename(&current_section.idref)
             )
         };
 
         println!(
             "Converting Chapter {:>3}/{}: {:<21} Title Source: TOC    Filename: {}",
-            chapter_number, number_of_ids, current_section, filename
+            chapter_number, number_of_ids, &current_section.idref, filename
         );
 
         output_to_file(
