@@ -110,8 +110,6 @@ fn save_cover(directory: String, doc: &mut EpubDoc<BufReader<File>>) {
 ///
 /// original-text: original txt files before replacement
 /// HTML: Original HTML chapter rip
-/// MP3
-/// WAV
 ///
 /// # Arguments
 /// * `output_directory: the name of the base output directory
@@ -120,8 +118,6 @@ fn save_cover(directory: String, doc: &mut EpubDoc<BufReader<File>>) {
 fn create_directory_structure(output_directory: String) {
     let original_text_directory = output_directory.clone() + "/original-text";
     let html_directory = output_directory.clone() + "/HTML";
-    let mp3_directory = output_directory.clone() + "/MP3";
-    let wav_directory = output_directory.clone() + "/WAV";
 
     if !Path::new(&output_directory).exists() {
         std::fs::create_dir(output_directory).unwrap();
@@ -131,12 +127,6 @@ fn create_directory_structure(output_directory: String) {
     }
     if !Path::new(&html_directory).exists() {
         std::fs::create_dir(html_directory).unwrap();
-    }
-    if !Path::new(&mp3_directory).exists() {
-        std::fs::create_dir(mp3_directory).unwrap();
-    }
-    if !Path::new(&wav_directory).exists() {
-        std::fs::create_dir(wav_directory).unwrap();
     }
 }
 
