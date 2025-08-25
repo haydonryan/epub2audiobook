@@ -12,9 +12,9 @@ regex = "1.11.1"
 scraper = "0.21.0"
 
 [profile.release]
-opt-level = 2
+opt-level = 3
 strip = true
-lto = true
+lto = "fat"
 codegen-units = 1
 
 [package.metadata.deb]
