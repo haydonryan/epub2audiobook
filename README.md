@@ -5,7 +5,7 @@ Simple project to convert EPUB books into text files for conversion to audiobook
 Files are optimized for use in [audiobookshelf](https://www.audiobookshelf.org/)
 
 ## Supported Text to Speech tools
-Currently the only TTS system that is tested is [PiperTTS](https://github.com/rhasspy/piper).  As you need to run this program manually yourself you can use any other local systems.
+Have tested this with TTS systems [PiperTTS](https://github.com/rhasspy/piper) and [Chatterbox-TTS](https://github.com/resemble-ai/chatterbox).  As you need to run this program manually yourself you can use any other local systems.  Piper is pretty unintensive on resources, but chatterbox-TTS allows you to clone whatever voice you want, is generally much better quality and is generally my preferred TTS system for 2025.
 
 If you're looking for an all in one that will send the text to Azure TTS and OpenAI TTS check out [https://github.com/p0n1/epub_to_audiobook](https://github.com/p0n1/epub_to_audiobook).
 
@@ -45,7 +45,7 @@ cargo install --path .
 
 
 ## Converting Books (Usage)
-You will need [PiperTTS](https://github.com/rhasspy/piper) and [FFmpeg](https://www.ffmpeg.org/) installed.
+You will need [PiperTTS](https://github.com/rhasspy/piper) or [Chatterbox-TTS](https://github.com/resemble-ai/chatterbox)  and [FFmpeg](https://www.ffmpeg.org/) installed.
 
 After converting a decent amount of books to audiobooks, I found there are really a few steps / checkpoints.
 1. Initial Conversion from EPUB -> Text
@@ -54,7 +54,7 @@ After converting a decent amount of books to audiobooks, I found there are reall
    ebook2audiobook <epub-filename.epub> <output directory>
 
     ```
-   
+
     Find and replace text.
 
     Piper doesn't handle certain phrases in 'typical' way eg most of us would read 1904 as 19 O 4, but piper reads it as one thousand nine hundred and four.
@@ -69,7 +69,7 @@ To ensure you enjoy your audiobooks, Ebook2audiobook now allows for custom repla
     ```
 
 2.    Delete text and title files you don't want to convert.
-  
+
       Currently TTS is expensive (cost of cloud or cpu time locally).  Converting a book with a large index, contents, appendix is a complete waste.  It's best to manually delete files you don't wnat to convert at this checkpoint.
 
 
@@ -81,6 +81,8 @@ To ensure you enjoy your audiobooks, Ebook2audiobook now allows for custom repla
     mkdir wav
     ls *.txt | xargs --max-procs=$TTS_THREADS -I % sh -c "cat '%' | <path-piper>/piper --length_scale 0.9 --model <model-path-and-file> --output_file 'wav/%.wav'"
     ```
+4. TXT -> WAV. via Chatterbox TTS
+   Coming soon.
 
 5. WAV -> MP3 via ffmpeg
    Currently Piper TTS only outputs wav files. The hardest part about converting these to mp3 is to inject the Title, Author, Chapter Title, and Cover into the ID4 tags of the MP3.
