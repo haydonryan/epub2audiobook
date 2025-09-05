@@ -328,6 +328,7 @@ fn create_bash_environment(output_directory: &str, title: &str, author: &str) {
 #[derive(Debug)]
 enum Epub2AudiobookError {
     IncorrectNumberOfArguments,
+    EPUBDoesNotExist,
 }
 
 impl fmt::Display for Epub2AudiobookError {
@@ -335,6 +336,9 @@ impl fmt::Display for Epub2AudiobookError {
         match self {
             Epub2AudiobookError::IncorrectNumberOfArguments => {
                 write!(f, "Incorrect number of arguments provided.")
+            }
+            Epub2AudiobookError::EPUBDoesNotExist => {
+                write!(f, "EPUB does not exist")
             }
         }
     }
@@ -355,16 +359,25 @@ fn main() -> Result<(), Epub2AudiobookError> {
         println!("epub2audiobook <epub-filename.epub> <output-directory>\n");
         return Err(Epub2AudiobookError::IncorrectNumberOfArguments);
     }
-    let filename = &args[1];
-    let output_directory = &args[2];
 
-    create_directory_structure(output_directory.to_string());
+    app(&args[1], &args[2])
+}
+
+fn app(filename: &str, output_directory: &str) -> Result<(), Epub2AudiobookError> {
+    //let filename = &args[1];
+    //let output_directory = &args[2];
+
+    // Check if filename exists:
+    if Path::new(filename).exists() != true {
+        return Err(Epub2AudiobookError::EPUBDoesNotExist);
+    }
 
     // Load the EPUB
     let doc = EpubDoc::new(filename);
     assert!(doc.is_ok());
     let mut doc = doc.unwrap();
 
+    create_directory_structure(output_directory.to_string());
     // Grab book metadata
     let title = doc.mdata("title");
     let author = doc.mdata("creator");
@@ -406,8 +419,19 @@ fn main() -> Result<(), Epub2AudiobookError> {
     );
 
     println!("\nDone.\n");
-
     Ok(())
+}
+
+// ************
+// Bug reporting TESTS
+// ************
+#[test]
+fn invalid_filename_should_not_cause_app_to_panic() {
+    let result = std::panic::catch_unwind(|| {
+        let _ = app("filename-does-not-exist.epub", "/tmp/test-output");
+    });
+
+    assert!(result.is_ok())
 }
 
 // ************
