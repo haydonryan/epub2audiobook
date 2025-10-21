@@ -40,3 +40,27 @@ jobs:
         run: cargo test --workspace --all-features
       - name: No-default features
         run: cargo test --workspace --no-default-features
+  Lint:
+    name: Lint
+    strategy:
+      matrix:
+        #os: ["ubuntu-latest", "windows-latest", "macos-latest"]
+        os: ["ubuntu-latest",  "macos-latest"]
+        rust: ["stable", "beta"]
+        include:
+        - os: ubuntu-latest
+          rust: "nightly"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ matrix.rust }}
+      - name: Print Cargo Version
+        run: cargo -V
+      - name: clippy
+        run: cargo clippy --verbose -- -D warnings
+      - name: audit
+        run: cargo audit
