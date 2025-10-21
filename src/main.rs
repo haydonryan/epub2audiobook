@@ -368,7 +368,7 @@ fn app(filename: &str, output_directory: &str) -> Result<(), Epub2AudiobookError
     //let output_directory = &args[2];
 
     // Check if filename exists:
-    if Path::new(filename).exists() != true {
+    if !Path::new(filename).exists() {
         return Err(Epub2AudiobookError::EPUBDoesNotExist);
     }
 
