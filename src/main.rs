@@ -80,7 +80,7 @@ fn output_to_file(filename: String, contents: &str) {
 ///
 /// # Arguments
 /// * `directory` - The directory that the cover file will be put in.  It will be named Cover and
-///                 have the same extnesion as it was embedded with.
+///   have the same extnesion as it was embedded with.
 /// * `doc` - The epub object
 /// # Returns
 /// Nothing as we don't want to fail if there are no embedded covers
