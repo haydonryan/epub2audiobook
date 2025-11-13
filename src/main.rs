@@ -171,7 +171,12 @@ fn get_chapter_titles(doc: &mut EpubDoc<BufReader<File>>) -> Vec<String> {
     let spine = doc.spine.clone();
 
     for (i, current_section) in spine.iter().enumerate() {
-        let path = doc.resources.get(&current_section.idref).unwrap().0.clone();
+        let path = doc
+            .resources
+            .get(&current_section.idref)
+            .unwrap()
+            .path
+            .clone();
         let text = doc.get_resource_by_path(&path).unwrap();
         let html = str::from_utf8(&text).unwrap();
         let chapter_number = i + 1;
@@ -242,7 +247,12 @@ fn convert_book(
     let spine = doc.spine.clone();
 
     for (i, current_section) in spine.iter().enumerate() {
-        let path = doc.resources.get(&current_section.idref).unwrap().0.clone();
+        let path = doc
+            .resources
+            .get(&current_section.idref)
+            .unwrap()
+            .path
+            .clone();
         let text = doc.get_resource_by_path(&path).unwrap();
         let html = str::from_utf8(&text).unwrap();
         let chapter_number = i + 1;
@@ -379,13 +389,13 @@ fn app(filename: &str, output_directory: &str) -> Result<(), Epub2AudiobookError
 
     create_directory_structure(output_directory.to_string());
     // Grab book metadata
-    let title = doc.mdata("title");
-    let author = doc.mdata("creator");
+    let title = doc.get_title();
+    let author = doc.mdata("creator").unwrap().value.clone();
     let number_of_ids = doc.spine.len();
     let number_of_toc = doc.toc.len();
 
     println!("Title: {}", title.clone().unwrap());
-    println!("Author: {}", author.clone().unwrap());
+    println!("Author: {}", author.clone());
     println!("Number of Sections: {}", number_of_ids);
     println!("Number of Items in TOC: {}\n", number_of_toc);
 
@@ -393,7 +403,7 @@ fn app(filename: &str, output_directory: &str) -> Result<(), Epub2AudiobookError
     save_cover(output_directory.to_string(), &mut doc);
 
     // Save a file that has title, and author predefined for ffmpeg later on
-    create_bash_environment(output_directory, &title.unwrap(), &author.unwrap());
+    create_bash_environment(output_directory, &title.unwrap(), &author);
 
     // Get chapter titles
     println!("Grabbing all title options for book");
