@@ -32,6 +32,8 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ matrix.rust }}
+      - name: Install Tarpaulin
+        run: cargo install cargo-tarpaulin
       - name: Print Cargo Version
         run: cargo -V
       - name: Default features
@@ -40,6 +42,8 @@ jobs:
         run: cargo test --workspace --all-features
       - name: No-default features
         run: cargo test --workspace --no-default-features
+      - name: Test Coverage
+        run: cargo tarpaulin #--fail-under 80
   Lint:
     name: Lint
     strategy:
@@ -60,5 +64,29 @@ jobs:
         run: cargo -V
       - name: clippy
         run: cargo clippy --verbose -- -D warnings
-#      - name: audit
-#        run: cargo audit
+  Security:
+    name: Audit
+    strategy:
+      matrix:
+        #os: ["ubuntu-latest", "windows-latest", "macos-latest"]
+        include:
+        - os: ubuntu-latest
+          rust: "stable"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ matrix.rust }}
+      - name: Install cargo-audit, cargo-deny
+        run: cargo install cargo-audit cargo-deny
+      - name: Print Cargo Version
+        run: cargo -V
+      - name: Security Check
+        run: cargo audit
+#  Cargo Deny is a little too hardcore right now for me - need to understand sublicense issues,
+#  and unmaintained sub dependencies
+#      - name: Dependency Check
+#        run: cargo deny check
