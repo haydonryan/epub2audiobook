@@ -82,13 +82,12 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ matrix.rust }}
-      - name: Install cargo-audit, cargo-deny
-        run: cargo install cargo-audit cargo-deny
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
       - name: Print Cargo Version
         run: cargo -V
       - name: Security Check
         run: cargo audit
-#  Cargo Deny is a little too hardcore right now for me - need to understand sublicense issues,
-#  and unmaintained sub dependencies
-#      - name: Dependency Check
-#        run: cargo deny check
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check bans sources advisories

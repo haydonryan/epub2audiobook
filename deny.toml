@@ -81,6 +81,8 @@ ignore = [
 # See Git Authentication for more information about setting up git authentication.
 #git-fetch-with-cli = true
 
+unmaintained = 'workspace'
+
 # This section is considered when running `cargo deny check licenses`
 # More documentation for the licenses section can be found here:
 # https://embarkstudios.github.io/cargo-deny/checks/licenses/cfg.html
