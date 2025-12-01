@@ -27,7 +27,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -53,7 +53,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -69,7 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: ['Test']
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Get the tag name
         if: env.VERSION == ''
         run: echo "VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
@@ -105,7 +105,7 @@ jobs:
       VERSION: ${{needs.Create-Release.outputs.version}}
       PKG_VERSION: ${{needs.Create-Release.outputs.pkg_version}}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Install cargo-deb
         run: cargo install cargo-deb
 
@@ -128,7 +128,7 @@ jobs:
       VERSION: ${{needs.Create-Release.outputs.version}}
       PKG_VERSION: ${{needs.Create-Release.outputs.pkg_version}}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Build MacOS Apple Silicon
         shell: bash
         env:
