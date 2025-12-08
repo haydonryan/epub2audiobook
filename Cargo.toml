@@ -9,7 +9,7 @@ authors = ["Haydon Ryan <haydon.ryan@gmail.com>"]
 [dependencies]
 epub = "2.1.5"
 regex = "1.12.2"
-scraper = "0.24.0"
+scraper = "0.25.0"
 
 [profile.release]
 opt-level = 3
