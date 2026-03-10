@@ -1,7 +1,7 @@
+use clap::Parser;
 use epub::doc::EpubDoc;
 use regex::Regex;
 use scraper::{Html, Selector};
-use std::env;
 use std::fmt;
 use std::fs::File;
 use std::io::BufReader;
@@ -337,16 +337,12 @@ fn create_bash_environment(output_directory: &str, title: &str, author: &str) {
 
 #[derive(Debug)]
 enum Epub2AudiobookError {
-    IncorrectNumberOfArguments,
     EPUBDoesNotExist,
 }
 
 impl fmt::Display for Epub2AudiobookError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Epub2AudiobookError::IncorrectNumberOfArguments => {
-                write!(f, "Incorrect number of arguments provided.")
-            }
             Epub2AudiobookError::EPUBDoesNotExist => {
                 write!(f, "EPUB does not exist")
             }
@@ -354,23 +350,31 @@ impl fmt::Display for Epub2AudiobookError {
     }
 }
 
+#[derive(Parser, Debug)]
+#[command(
+    name = "epub2audiobook",
+    version,
+    about = "Convert an EPUB into chapterized text files for TTS processing",
+    long_about = None
+)]
+struct Cli {
+    #[arg(value_name = "EPUB_FILE")]
+    epub_filename: String,
+    #[arg(value_name = "OUTPUT_DIR")]
+    output_directory: String,
+}
+
 //
 // Main Function
 //
 fn main() -> Result<(), Epub2AudiobookError> {
+    let cli = Cli::parse();
+
     println!("\n=========================");
     println!("= EPUB to TXT Converter =");
     println!("=========================");
 
-    // Grab Command Line Arguments and print usage if incorrect.
-    let args: Vec<String> = env::args().collect();
-    if args.len() != 3 {
-        println!("\nUsage:");
-        println!("epub2audiobook <epub-filename.epub> <output-directory>\n");
-        return Err(Epub2AudiobookError::IncorrectNumberOfArguments);
-    }
-
-    app(&args[1], &args[2])
+    app(&cli.epub_filename, &cli.output_directory)
 }
 
 fn app(filename: &str, output_directory: &str) -> Result<(), Epub2AudiobookError> {
