@@ -1,0 +1,13 @@
+pkgbase = ebook2audiobook
+	pkgdesc = Convert EPUB books into text files for audiobooks
+	pkgver = 0.2.1
+	pkgrel = 1
+	url = https://github.com/haydonryan/epub2audiobook
+	arch = x86_64
+	license = MIT
+	makedepends = cargo
+	optdepends = ffmpeg: for WAV to MP3 encoding with bundled script
+	source = ebook2audiobook-0.2.1.tar.gz::https://github.com/haydonryan/epub2audiobook/archive/v0.2.1.tar.gz
+	sha256sums = eb3ad5a1e84d8d47e6603966a046cc791491239f15ab7b539c4b9969ee0cbb61
+
+pkgname = ebook2audiobook

@@ -27,6 +27,20 @@ Chapter Titles are currently matched with the Table of Contents, if a match does
 sudo dpkg -i ebook2audiobook_0.1.0-1_amd64.deb
 ```
 
+### Arch Linux (AUR)
+Note: Building from AUR requires the Rust toolchain; `makepkg`/`yay` will install `cargo` (and `rustc`) as build dependencies if needed.
+Install from the AUR with `yay`:
+``` bash
+yay -S ebook2audiobook
+```
+
+Manual AUR build:
+``` bash
+git clone https://aur.archlinux.org/ebook2audiobook.git
+cd ebook2audiobook
+makepkg -si
+```
+
 ### Installation from Source.
 Requires the rust toolchain (cargo + rustc)
 ``` bash
@@ -97,7 +111,7 @@ To ensure you enjoy your audiobooks, Ebook2audiobook now allows for custom repla
 - Integrate text replacement (in progress)
 - Improve title extraction
 - Publishing deb to apt repository
-- Publishing binary to AUR
+- Maintain AUR package
 
 ## Why does this project exist?
 I've spent a bunch of my spare time learning the Rust programming language.
