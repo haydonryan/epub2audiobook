@@ -1,8 +1,8 @@
-name: Test Commit
-
+name: PR Notify
 
 permissions:
   contents: read
+
 on:
   pull_request:
 
@@ -10,17 +10,16 @@ jobs:
   run:
     name: Sent Notification of PR
     runs-on: ubuntu-latest
+    env:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
     steps:
-    - name: Post blocks to a Slack channel
-      uses: slackapi/slack-github-action@v2.1.1
-      with:
-        method: chat.postMessage
-        token: ${{ secrets.SLACK_BOT_TOKEN }}
-        payload: |
-          channel: ${{ secrets.SLACK_CHANNEL_ID }}
-          text: "Incoming PR: ${{ github.event.pull_request.html_url}}"
-#          blocks:
-#            - type: "section"
-#              text:
-#                type: "mrkdwn"
-#                text: "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+      - name: Post blocks to a Slack channel
+        if: ${{ env.SLACK_BOT_TOKEN != '' && env.SLACK_CHANNEL_ID != '' }}
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
+            text: "Incoming PR: ${{ github.event.pull_request.html_url}}"
