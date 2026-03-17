@@ -7,7 +7,7 @@ repository = "https://github.com/haydonryan/epub2audiobook"
 authors = ["Haydon Ryan <haydon.ryan@gmail.com>"]
 
 [dependencies]
-clap = { version = "4.5.4", features = ["derive"] }
+clap = { version = "4.6.0", features = ["derive"] }
 epub = "2.1.5"
 regex = "1.12.3"
 scraper = "0.25.0"
