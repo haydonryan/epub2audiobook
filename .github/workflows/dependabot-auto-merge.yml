@@ -9,6 +9,7 @@ on:
       - ready_for_review
 
 permissions:
+  checks: write
   contents: write
   pull-requests: write
 

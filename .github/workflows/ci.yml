@@ -16,6 +16,7 @@ env:
   CLICOLOR: 1
 
 permissions:
+  checks: write
   contents: read
   pull-requests: write
 

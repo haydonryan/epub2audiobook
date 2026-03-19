@@ -1,6 +1,7 @@
 name: PR Notify
 
 permissions:
+  checks: write
   contents: read
 
 on:
