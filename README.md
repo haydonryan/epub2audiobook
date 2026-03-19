@@ -57,6 +57,14 @@ Build and install the binary.
 cargo install --path .
 ```
 
+## Development
+
+Enable the repo's pre-commit hook to run formatting, clippy, and tests before each commit:
+
+```bash
+git config core.hooksPath .githooks
+```
+
 
 ## Converting Books (Usage)
 You will need [PiperTTS](https://github.com/rhasspy/piper) or [Chatterbox-TTS](https://github.com/resemble-ai/chatterbox)  and [FFmpeg](https://www.ffmpeg.org/) installed.
