@@ -19,7 +19,6 @@ env:
   RUST_BACKTRACE: 1
   CARGO_TERM_COLOR: always
   CLICOLOR: 1
-  BINARY_NAME: vaultwarden-cli
 
 jobs:
   Build:
@@ -62,6 +61,15 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
+
+      - name: Detect binary name
+        shell: bash
+        run: |
+          BINARY_NAME="$(
+            cargo metadata --no-deps --format-version 1 \
+              | python -c 'import json, sys; data = json.load(sys.stdin); pkg = next(p for p in data["packages"] if p["manifest_path"].endswith("Cargo.toml")); bins = [t["name"] for t in pkg["targets"] if "bin" in t["kind"]]; print(bins[0])'
+          )"
+          echo "BINARY_NAME=$BINARY_NAME" >> "$GITHUB_ENV"
 
       - name: Install cross
         if: matrix.cross
