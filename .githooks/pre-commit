@@ -21,5 +21,11 @@ fi
 echo "Running cargo clippy..."
 cargo clippy --all-targets --all-features -- -D warnings
 
+echo "Running cargo audit..."
+cargo audit
+
+echo "Running cargo deny..."
+cargo deny check all
+
 echo "Running cargo test..."
 cargo test
