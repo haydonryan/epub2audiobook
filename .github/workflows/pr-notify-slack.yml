@@ -15,7 +15,8 @@ jobs:
     name: Send Notification for External PRs
     if: >
       github.event.pull_request.user.login != github.repository_owner &&
-      github.event.pull_request.user.login != 'dependabot[bot]'
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'github-actions[bot]'
     runs-on: ubuntu-latest
     env:
       SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

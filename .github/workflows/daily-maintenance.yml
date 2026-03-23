@@ -1,0 +1,171 @@
+name: Daily Dependency Maintenance
+
+on:
+  schedule:
+    - cron: '17 8 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  workflows: write
+
+jobs:
+  daily-maintenance:
+    name: Daily dependency maintenance
+    runs-on: ubuntu-latest
+    env:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cargo-audit and cargo-deny
+        run: |
+          cargo install cargo-audit --locked
+          cargo install cargo-deny --locked
+
+      - name: Baseline tests
+        id: baseline-tests
+        continue-on-error: true
+        run: cargo test --workspace
+
+      - name: Baseline audit
+        id: baseline-audit
+        if: steps.baseline-tests.outcome == 'success'
+        continue-on-error: true
+        run: cargo audit
+
+      - name: Baseline deny
+        id: baseline-deny
+        if: steps.baseline-tests.outcome == 'success'
+        continue-on-error: true
+        run: cargo deny check all
+
+      - name: Update dependencies
+        id: cargo-update
+        if: >
+          steps.baseline-tests.outcome == 'success' &&
+          (steps.baseline-audit.outcome == 'failure' || steps.baseline-deny.outcome == 'failure')
+        run: cargo update
+
+      - name: Detect dependency changes
+        id: changes
+        if: steps.cargo-update.outcome == 'success'
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Updated tests
+        id: updated-tests
+        if: steps.changes.outputs.changed == 'true'
+        continue-on-error: true
+        run: cargo test --workspace
+
+      - name: Updated audit
+        id: updated-audit
+        if: steps.changes.outputs.changed == 'true'
+        continue-on-error: true
+        run: cargo audit
+
+      - name: Updated deny
+        id: updated-deny
+        if: steps.changes.outputs.changed == 'true'
+        continue-on-error: true
+        run: cargo deny check all
+
+      - name: Create dependency update PR
+        id: create-pr
+        if: >
+          steps.changes.outputs.changed == 'true' &&
+          steps.updated-tests.outcome == 'success' &&
+          steps.updated-audit.outcome == 'success' &&
+          steps.updated-deny.outcome == 'success'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          add-paths: |
+            Cargo.lock
+          branch: automation/daily-cargo-update
+          delete-branch: true
+          commit-message: Run cargo update
+          title: Run cargo update
+          body: |
+            Automated daily dependency refresh after security checks found actionable updates.
+
+            Validation run:
+            - `cargo test --workspace`
+            - `cargo audit`
+            - `cargo deny check all`
+          labels: |
+            dependencies
+            automated
+
+      - name: Enable auto-merge
+        id: automerge
+        if: steps.create-pr.outputs.pull-request-number != ''
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ steps.create-pr.outputs.pull-request-url }}
+        run: gh pr merge --auto --squash "$PR_URL"
+
+      - name: Evaluate outcome
+        id: evaluate
+        if: always()
+        run: |
+          needs_attention=false
+          message=""
+
+          if [[ "${{ steps.baseline-tests.outcome }}" == "failure" ]]; then
+            needs_attention=true
+            message="Baseline cargo test failed on the default branch."
+          elif [[ "${{ steps.baseline-audit.outcome }}" == "failure" || "${{ steps.baseline-deny.outcome }}" == "failure" ]]; then
+            if [[ "${{ steps.cargo-update.outcome }}" == "failure" ]]; then
+              needs_attention=true
+              message="cargo update failed after daily security checks found dependency issues."
+            elif [[ "${{ steps.changes.outputs.changed }}" != "true" ]]; then
+              needs_attention=true
+              message="Security checks found dependency issues, but cargo update produced no lockfile changes."
+            elif [[ "${{ steps.updated-tests.outcome }}" == "failure" ]]; then
+              needs_attention=true
+              message="cargo update resolved dependency issues, but cargo test failed afterward."
+            elif [[ "${{ steps.updated-audit.outcome }}" == "failure" || "${{ steps.updated-deny.outcome }}" == "failure" ]]; then
+              needs_attention=true
+              message="cargo update ran, but cargo audit or cargo deny still failed afterward."
+            elif [[ "${{ steps.create-pr.outcome }}" == "failure" ]]; then
+              needs_attention=true
+              message="Validated dependency updates could not be turned into a pull request."
+            elif [[ "${{ steps.create-pr.outputs.pull-request-number }}" != "" && "${{ steps.automerge.outcome }}" == "failure" ]]; then
+              needs_attention=true
+              message="Dependency update PR was created, but auto-merge could not be enabled."
+            fi
+          fi
+
+          echo "needs_attention=$needs_attention" >> "$GITHUB_OUTPUT"
+          {
+            echo "message<<EOF"
+            echo "$message"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Notify Slack
+        if: >
+          always() &&
+          steps.evaluate.outputs.needs_attention == 'true' &&
+          env.SLACK_BOT_TOKEN != '' &&
+          env.SLACK_CHANNEL_ID != ''
+        uses: slackapi/slack-github-action@v3.0.1
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
+            text: "Daily dependency maintenance needs attention for ${{ github.repository }}: ${{ steps.evaluate.outputs.message }} Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
