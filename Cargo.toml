@@ -10,7 +10,7 @@ authors = ["Haydon Ryan <haydon.ryan@gmail.com>"]
 clap = { version = "4.6.0", features = ["derive"] }
 epub = "2.1.5"
 regex = "1.12.3"
-scraper = "0.25.0"
+scraper = "0.26.0"
 
 [profile.release]
 opt-level = 3
