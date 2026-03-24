@@ -69,7 +69,7 @@ jobs:
         run: cargo install cargo-tarpaulin --locked
 
       - name: Run Tarpaulin
-        run: cargo tarpaulin --workspace --all-features --skip-clean --out JsonSummary --output-dir tarpaulin-report
+        run: cargo tarpaulin --workspace --all-features --skip-clean --out Json --output-dir tarpaulin-report
 
       - name: Build coverage comment body
         id: coverage
