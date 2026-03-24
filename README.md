@@ -129,3 +129,7 @@ I was looking for a small project to help learn the language and frameworks.  Wh
 In my opinion python has it's use cases (for scripting, AI experimentation) but the big problem with the language is that it forces the end user to manage dependencies.  I believe that command line tools (unless for good reason) should be written in compiled (safe) languages.  It doesn't have to be rust - that's just what I used.
 
 It's more efficient, it's easier for end users to use your program, and it's safer. /rant
+
+## Links
+
+[![Hypercommit](https://img.shields.io/badge/Hypercommit-DB2475)](https://hypercommit.com/epub2audiobook)
