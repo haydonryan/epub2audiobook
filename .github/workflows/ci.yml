@@ -79,9 +79,11 @@ jobs:
           from pathlib import Path
 
           summary = json.loads(Path('tarpaulin-report/tarpaulin-report.json').read_text())
-          covered = summary.get('covered')
-          coverable = summary.get('coverable')
+          covered = summary.get('covered') or 0
+          coverable = summary.get('coverable') or 0
           pct = summary.get('percent')
+          if pct is None:
+              pct = (covered / coverable * 100) if coverable else 0.0
 
           body = f'''<!-- rust-starter-coverage-comment -->
           ## Coverage Report
