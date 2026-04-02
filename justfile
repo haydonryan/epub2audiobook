@@ -12,3 +12,10 @@ pre-commit:
     cargo audit
     cargo deny check all
     cargo test
+
+release *args:
+    git pull --rebase
+    cargo release {{args}}
+
+install:
+    cargo install --path .
