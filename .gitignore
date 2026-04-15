@@ -1,4 +1,5 @@
 /target
+/.codex
 *.epub
 *.pdf
 
