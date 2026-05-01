@@ -3,21 +3,17 @@ use std::fs;
 
 fn process_line(text: &str) -> (String, String) {
     if text.chars().next().is_none() {
-        return ("".to_string(), "".to_string());
+        return (String::new(), String::new());
     }
     if text.starts_with('#') {
-        return ("".to_string(), "".to_string());
+        return (String::new(), String::new());
     }
     let ret = text.split_once("==");
-    match ret {
-        Some((x, y)) => (x.to_string(), y.to_string()),
-        None => {
-            println!(
-                "Custom Replacements File Syntax error - Ignoring line, no '==' found: {}",
-                text
-            );
-            ("".to_string(), "".to_string())
-        }
+    if let Some((x, y)) = ret {
+        (x.to_string(), y.to_string())
+    } else {
+        println!("Custom Replacements File Syntax error - Ignoring line, no '==' found: {text}");
+        (String::new(), String::new())
     }
     //assert_eq!("cfg=".split_once('='), Some(("cfg", "")));
 }
@@ -37,18 +33,18 @@ pub fn process_user_replacements(text: &str, replacements: &Vec<(String, String)
         let re = Regex::new(&replace.0).unwrap();
         ret = re.replace_all(&ret, &replace.1).to_string();
     }
-    ret.to_string()
+    ret
 }
 
 pub fn load_custom_replacements(filename: &str) -> Option<Vec<(String, String)>> {
     let file_result = fs::read_to_string(filename);
     match file_result {
         Ok(file_text) => {
-            println!("Opening custom user replacements: {}", filename);
+            println!("Opening custom user replacements: {filename}");
             Some(process_file_text(&file_text))
         }
         Err(error) => {
-            eprintln!("Unable to open file: {} {}", error, filename);
+            eprintln!("Unable to open file: {error} {filename}");
             None
         }
     }
@@ -63,25 +59,25 @@ fn test_split_valid_replacement() {
 #[test]
 fn test_return_empty_for_empty_string() {
     let text = "";
-    assert_eq!(process_line(text), ("".to_string(), "".to_string()));
+    assert_eq!(process_line(text), (String::new(), String::new()));
 }
 
 #[test]
 fn test_return_empty_for_missing_splitter() {
     let text = "word  WORD";
-    assert_eq!(process_line(text), ("".to_string(), "".to_string()));
+    assert_eq!(process_line(text), (String::new(), String::new()));
 }
 
 #[test]
 fn test_process_line_is_comment() {
     let text = "# comment";
-    assert_eq!(process_line(text), ("".to_string(), "".to_string()));
+    assert_eq!(process_line(text), (String::new(), String::new()));
 
     let text = "      # comment";
-    assert_eq!(process_line(text), ("".to_string(), "".to_string()));
+    assert_eq!(process_line(text), (String::new(), String::new()));
 
     let text = "# WORD==word";
-    assert_eq!(process_line(text), ("".to_string(), "".to_string()));
+    assert_eq!(process_line(text), (String::new(), String::new()));
 }
 
 // Currently not going to support this

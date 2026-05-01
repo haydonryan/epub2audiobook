@@ -1,3 +1,11 @@
+#![allow(
+    clippy::doc_markdown,
+    clippy::match_same_arms,
+    clippy::needless_pass_by_value,
+    clippy::option_if_let_else,
+    clippy::trivial_regex
+)]
+
 use clap::Parser;
 use epub::doc::EpubDoc;
 use regex::Regex;
@@ -18,13 +26,13 @@ fn get_title_from_section_tag(html: &str) -> String {
     let input = document.select(&selector).next();
 
     if input.is_none() {
-        return "".to_string();
+        return String::new();
     }
 
     let input = document.select(&selector).next();
     match input.unwrap().attr("title") {
         Some(input) => input.to_string(),
-        None => "".to_string(),
+        None => String::new(),
     }
 }
 
@@ -37,7 +45,7 @@ fn get_title_from_title_tag(html: &str) -> String {
         .flat_map(|element| element.text().collect::<Vec<_>>())
         .collect::<String>();
 
-    title.to_owned()
+    title
 }
 
 /// Return if all the strings are the same (or empty)
@@ -69,10 +77,10 @@ fn all_strings_the_same(strings: &Vec<String>) -> bool {
 fn output_to_file(filename: String, contents: &str) {
     let mut file = match File::create(filename) {
         Ok(file) => file,
-        Err(error) => panic!("Could not create file: {}", error),
+        Err(error) => panic!("Could not create file: {error}"),
     };
     if let Err(error) = file.write_all(contents.as_bytes()) {
-        panic!("Error writing contents to file: {}", error);
+        panic!("Error writing contents to file: {error}");
     }
 }
 
@@ -95,9 +103,9 @@ fn save_cover(directory: String, doc: &mut EpubDoc<BufReader<File>>) {
     //let filename = format!("{}/Cover.png", directory);
 
     let filename = match cover_data.1.as_ref() {
-        "image/jpeg" => format!("{}/Cover.jpg", directory),
-        "image/png" => format!("{}/Cover.png", directory),
-        _ => format!("{}/Cover.png", directory),
+        "image/jpeg" => format!("{directory}/Cover.jpg"),
+        "image/png" => format!("{directory}/Cover.png"),
+        _ => format!("{directory}/Cover.png"),
     };
 
     let f = File::create(filename);
@@ -171,12 +179,7 @@ fn get_chapter_titles(doc: &mut EpubDoc<BufReader<File>>) -> Vec<String> {
     let spine = doc.spine.clone();
 
     for (i, current_section) in spine.iter().enumerate() {
-        let path = doc
-            .resources
-            .get(&current_section.idref)
-            .unwrap()
-            .path
-            .clone();
+        let path = doc.resources[&current_section.idref].path.clone();
         let text = doc.get_resource_by_path(&path).unwrap();
         let html = str::from_utf8(&text).unwrap();
         let chapter_number = i + 1;
@@ -195,20 +198,20 @@ fn get_chapter_titles(doc: &mut EpubDoc<BufReader<File>>) -> Vec<String> {
             .map(|toc| toc.label.clone())
             .unwrap_or_default();
 
-        toc_titles.push(toc_title.to_string());
-        println!("  - Title from TOC Tag: <{}>", toc_title);
+        toc_titles.push(toc_title.clone());
+        println!("  - Title from TOC Tag: <{toc_title}>");
 
         let title_tag_title = get_title_from_title_tag(html);
         if title_tag_title.ne("Cover") {
             title_tag_titles.push(title_tag_title.clone());
-            println!("  - Title from Title Tag: <{}>", title_tag_title);
+            println!("  - Title from Title Tag: <{title_tag_title}>");
         } else {
-            println!("  - Title from Title Tag: <{}> - ignoring", title_tag_title);
+            println!("  - Title from Title Tag: <{title_tag_title}> - ignoring");
         }
 
         let section_tag_title = get_title_from_section_tag(html);
         section_tag_titles.push(section_tag_title.clone());
-        println!("  - Title from Section Tag: <{}>\n", section_tag_title);
+        println!("  - Title from Section Tag: <{section_tag_title}>\n");
     }
 
     println!("Applying Rules to decide Title Source");
@@ -247,12 +250,7 @@ fn convert_book(
     let spine = doc.spine.clone();
 
     for (i, current_section) in spine.iter().enumerate() {
-        let path = doc
-            .resources
-            .get(&current_section.idref)
-            .unwrap()
-            .path
-            .clone();
+        let path = doc.resources[&current_section.idref].path.clone();
         let text = doc.get_resource_by_path(&path).unwrap();
         let html = str::from_utf8(&text).unwrap();
         let chapter_number = i + 1;
@@ -343,7 +341,7 @@ enum Epub2AudiobookError {
 impl fmt::Display for Epub2AudiobookError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Epub2AudiobookError::EPUBDoesNotExist => {
+            Self::EPUBDoesNotExist => {
                 write!(f, "EPUB does not exist")
             }
         }
@@ -399,9 +397,9 @@ fn app(filename: &str, output_directory: &str) -> Result<(), Epub2AudiobookError
     let number_of_toc = doc.toc.len();
 
     println!("Title: {}", title.clone().unwrap());
-    println!("Author: {}", author.clone());
-    println!("Number of Sections: {}", number_of_ids);
-    println!("Number of Items in TOC: {}\n", number_of_toc);
+    println!("Author: {author}");
+    println!("Number of Sections: {number_of_ids}");
+    println!("Number of Items in TOC: {number_of_toc}\n");
 
     // Save the book cover to the output directory
     save_cover(output_directory.to_string(), &mut doc);
@@ -442,10 +440,10 @@ fn app(filename: &str, output_directory: &str) -> Result<(), Epub2AudiobookError
 #[test]
 fn invalid_filename_should_not_cause_app_to_panic() {
     let result = std::panic::catch_unwind(|| {
-        let _ = app("filename-does-not-exist.epub", "/tmp/test-output");
+        drop(app("filename-does-not-exist.epub", "/tmp/test-output"));
     });
 
-    assert!(result.is_ok())
+    result.unwrap();
 }
 
 // ************
