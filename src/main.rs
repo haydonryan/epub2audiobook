@@ -274,7 +274,7 @@ fn convert_book(
 
         println!(
             "Converting Chapter {:>3}/{}: {:<21} Title Source: TOC    Filename: {}",
-            chapter_number, number_of_ids, &current_section.idref, filename
+            chapter_number, number_of_ids, current_section.idref, filename
         );
 
         output_to_file(
