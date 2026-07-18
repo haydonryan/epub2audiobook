@@ -478,7 +478,10 @@ fn filter_sup_numbers_removes_multiple_sup_numbers() {
 #[test]
 fn filter_sup_numbers_ignores_non_numeric_sup() {
     let html = r#"text<sup>*</sup> more<sup class="calibre11">TM</sup> end"#;
-    assert_eq!(filter_sup_numbers(html), r#"text<sup>*</sup> more<sup class="calibre11">TM</sup> end"#);
+    assert_eq!(
+        filter_sup_numbers(html),
+        r#"text<sup>*</sup> more<sup class="calibre11">TM</sup> end"#
+    );
 }
 
 #[test]
