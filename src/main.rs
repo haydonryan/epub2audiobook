@@ -164,6 +164,18 @@ fn extract_text_from_html(html: &str) -> String {
         .collect::<String>()
 }
 
+/// Removes `<sup>N</sup>` tags (where N is one or more digits) from HTML.
+/// Footnote markers like `<sup class="calibre11">1</sup>` or `<sup>12</sup>` are stripped.
+///
+/// # Arguments
+/// * `html` - The HTML string to filter
+/// # Returns
+/// String of HTML with numeric superscript tags removed
+fn filter_sup_numbers(html: &str) -> String {
+    let re = Regex::new(r"<sup[^>]*>\s*[0-9]+\s*</sup>").unwrap();
+    re.replace_all(html, "").to_string()
+}
+
 /// Builds a list of chapter titles to use as filenames, and metadata
 ///
 /// # Arguments
@@ -288,7 +300,8 @@ fn convert_book(
         );
 
         // Write the original text un changed into the original-text directory
-        let text = extract_text_from_html(html);
+        let html = filter_sup_numbers(html);
+        let text = extract_text_from_html(&html);
         output_to_file(
             output_directory.to_owned() + "/original-text/" + &filename + ".txt",
             &text,
@@ -449,6 +462,44 @@ fn invalid_filename_should_not_cause_app_to_panic() {
 // ************
 // TESTS
 // ************
+
+#[test]
+fn filter_sup_numbers_removes_simple_sup_number() {
+    let html = r#"some text<sup class="calibre11">1</sup> more text"#;
+    assert_eq!(filter_sup_numbers(html), "some text more text");
+}
+
+#[test]
+fn filter_sup_numbers_removes_multiple_sup_numbers() {
+    let html = r#"text<sup class="calibre11">1</sup> more<sup>2</sup> end<sup>99</sup>."#;
+    assert_eq!(filter_sup_numbers(html), "text more end.");
+}
+
+#[test]
+fn filter_sup_numbers_ignores_non_numeric_sup() {
+    let html = r#"text<sup>*</sup> more<sup class="calibre11">TM</sup> end"#;
+    assert_eq!(filter_sup_numbers(html), r#"text<sup>*</sup> more<sup class="calibre11">TM</sup> end"#);
+}
+
+#[test]
+fn filter_sup_numbers_handles_empty_input() {
+    assert_eq!(filter_sup_numbers(""), "");
+}
+
+#[test]
+fn filter_sup_numbers_based_on_howard_hughes_html() {
+    let html = r#"<p class="calibre_19">The Hughes clan traced their origins in the New World to the very beginning of colonial America, when Jesse Hughes, of English-Welsh ancestry, settled in Powhatan County, Virginia, a few years after Jamestown was founded in 1607. They were a big-boned people with large ears and long, gangly limbs, often afflicted with hearing impairments, crippling arthritis, and irascible temperaments.<sup class="calibre11">1</sup> As America moved west, so did they—first to Kentucky, then to Illinois, and finally, in 1853, to northeast Missouri.</p>"#;
+    let result = filter_sup_numbers(html);
+    assert!(!result.contains("<sup class=\"calibre11\">1</sup>"));
+    assert!(result.contains("irascible temperaments. As America moved west"));
+}
+
+#[test]
+fn filter_sup_numbers_does_not_remove_asterisk_sup() {
+    let html = r#"The foundation of the Hughes fortune had been laid.<span><a id="filepos96901" href="index_split_045.html#filepos2319695"><sup class="calibre11">*</sup></a></span>"#;
+    let result = filter_sup_numbers(html);
+    assert!(result.contains("<sup class=\"calibre11\">*</sup>"));
+}
 
 #[test]
 fn get_title_from_section_tag_handles_empty_string() {
